@@ -1,0 +1,117 @@
+extends layout
+
+block content
+  .content-wrapper
+  .charts
+    canvas#myChart
+  .filters-wrapper
+    select#mapFilter.Filter(onchange='mapFilter()')
+      option(value='' disabled='' selected='') Map Filter
+      option(value='Cache') Cache
+      option(value='Cobblestone') Cobblestone
+      option(value='Dust II') Dust II
+      option(value='Inferno') Inferno
+      option(value='Mirage') Mirage
+      option(value='Nuke') Nuke
+      option(value='Overpass') Overpass
+      option(value='Train') Train
+    select.Filter(onchange='resultsFilter()')
+      option(value='' disabled='' selected='') Results Filter
+      option(value='win') Win
+      option(value='loss') Loss
+      option(value='draw') Draw
+  .table-wrapper
+    table#timTable
+      tr
+        th Date
+        th Map
+        th Score
+        th Rating
+        th Adr
+        th KDD
+        th KPR
+        th KPR:T
+        th KPR:CT
+        th Trades
+        th HS%
+        th Kills
+        th Assists
+        th Deaths
+      tr
+        th(colspan='3') Averages:
+    each stat in stats_list
+      tr
+        td #{stats_list.match.date}
+        td #{stats_list.match.map}
+        td #{stats_list.match.score[0]}-#{stats_list.score[1]}
+        td #{stats_list.rating}
+        td #{stats_list.adr}
+        td #{stats_list.kdd}
+        td #{stats_list.kpr}
+        td #{stats_list.kpr_t}
+        td #{stats_list.kpr_ct}
+        td #{stats_list.trades}
+        td #{stats_list.hs}
+        td #{stats_list.kills}
+        td #{stats_list.assists}
+        td #{stats_list.deaths}
+
+  script(src='./node_modules/chart.js/dist/Chart.js')
+  script.
+    function mapFilter() {
+      var table = document.getElementById("timTable");
+      var input = document.getElementById("mapFilter");
+      var tr = table.getElementsByTagName("tr");
+      var filter = input.options[input.selectedIndex].value;
+      filter = filter.toUpperCase();
+      for (i = 0; i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[1];
+        if (td) {
+          if (td.innerHTML.toUpperCase().indexOf(filter) > -1) {
+            tr[i].style.display = "";
+          } else {
+            tr[i].style.display = "none";
+          }
+        }
+      }
+    }
+    function resultsFilter() {
+      var table = document.getElementById("timTable");
+      var input = document.getElementById("resultsFilter");
+      var tr = table.getElementsByTagName("");
+      var filter = input.options[input.selectedIndex].value;
+      for (i = 0;  i < tr.length; i++) {
+        td = tr[i].getElementsByTagName("td")[2];
+        if (td) {
+        }
+      }
+    }
+    var ctx = document.getElementById("myChart");
+    var chart = new Chart(ctx, {
+      type: 'line',
+      data: {
+        //labels: ["January", "February", "March"]
+        datasets: [{
+          label: 'test Ratings',
+          data: [{
+            x: 2,
+            y: 1
+          }, {
+            x: 10,
+            y:5
+          }, {
+            x: 15,
+            y: 1
+          }],
+          fill: false,
+          lineTension:0
+        }]
+      },
+      options: {
+        scales: {
+          xAxes: [{
+            type: 'linear',
+          }]
+        }
+      }
+    });

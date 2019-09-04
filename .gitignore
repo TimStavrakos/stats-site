@@ -1,0 +1,9 @@
+node_modules/
+__pycache__/
+index.html
+leaderboards.html
+populatedb.py
+shared.html
+stats_runner.py
+test_populatedb.py
+Tim.html

@@ -1,0 +1,24 @@
+doctype html
+html
+  head
+    title= title
+    link(rel='stylesheet', href='/stylesheets/index.css')
+    script(src='https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.6.0/Chart.bundle.min.js')
+  body
+  .navbar
+    a(href='/') Home
+    a(href='/Shared') Stats
+    .dropdown
+      button.dropbutton
+        | Players
+        i.fa.fa-caret-down
+      .dropdown-content
+        a(href='/users/Tim') Tim
+        a(href='/users/Ryan') Ryan
+        a(href='/users/Collin') Collin
+        a(href='/users/Sean') Sean
+        a(href='/users/Cal') Cal
+        a(href='/users/Sharfin') Sharfin
+        a(href='/users/Josh') Josh
+    a(href='/leaderboards') Leaderboards
+  block content

@@ -1,0 +1,223 @@
+extends layout
+
+block content
+  .content-wrapper
+  .charts
+    canvas#myChart
+  .filters-wrapper
+    select#mapFilter.Filter(onchange='filter()')
+      option(value='' disabled='' selected='') Map Filter
+      option(value='Cache') Cache
+      option(value='Cobblestone') Cobblestone
+      option(value='Dust II') Dust II
+      option(value='Inferno') Inferno
+      option(value='Mirage') Mirage
+      option(value='Nuke') Nuke
+      option(value='Overpass') Overpass
+      option(value='Train') Train
+    select#resultsFilter.Filter(onchange='filter()')
+      option(value='' disabled='' selected='') Results Filter
+      option(value='win') Win
+      option(value='loss') Loss
+      option(value='draw') Draw
+    input#startDate.Filter(type="date" value="2018-02-07" onchange="filter()")
+    input#endDate.Filter(type="date" onchange="filter()")
+  .table-wrapper
+    table#statsTable.fixed_headers
+      tr#header
+        th Date
+        th Map
+        th Score
+        th Rating
+        th Adr
+        th KDD
+        th KPR
+        th KPR:T
+        th KPR:CT
+        th Trades
+        th HS%
+        th Kills
+        th Assists
+        th Deaths
+        th Clutches
+      tr#averagesHeader
+        th(colspan='3') Averages:
+        th= averages.rating.toFixed(2)
+        th= (averages.adr).toFixed(2)
+        th= (averages.kdd).toFixed(2)
+        th= (averages.kpr).toFixed(2)
+        th= (averages.kpr_t).toFixed(2)
+        th= (averages.kpr_ct).toFixed(2)
+        th= (averages.trades).toFixed(2)
+        th= (averages.hs).toFixed(2)
+        th= (averages.kills).toFixed(2)
+        th= (averages.assists).toFixed(2)
+        th= (averages.deaths).toFixed(2)
+        th= (averages.clutches).toFixed(2)
+
+      each stat in stats_list
+        - var result = stat.match.score[0] != stat.match.score[1] ? (stat.match.score[0] > stat.match.score[1] ? 'win_row' : 'loss_row') : 'draw_row'
+        tr(class=result)
+          td #{stat.match.formatted_date}
+          td #{stat.match.map}
+          td #{stat.match.score[0]}-#{stat.match.score[1]}
+          td= stat.rating.toFixed(2)
+          td= stat.adr
+          td= stat.kdd
+          td= stat.kpr.toFixed(2)
+          if stat.kpr_t == null
+            td= stat.kpr_t
+          else
+            td= stat.kpr_t.toFixed(2)
+          td= stat.kpr_ct.toFixed(2)
+          td #{stat.trades}
+          td #{stat.hs}
+          td #{stat.kills}
+          td #{stat.assists}
+          td #{stat.deaths}
+          td #{stat.clutches}
+
+  script.
+    window.onload = function() {todaysDate();getMaps();}
+    window.onready = function() {getMaps();}
+
+    function todaysDate() {
+      var today = new Date();
+      var input = document.getElementById("endDate");
+      input.value = today.getFullYear() + "-" + ("0" + (today.getMonth() + 1)).slice(-2) + "-" + ("0" + today.getDate()).slice(-2);
+    }
+
+    function updateAverages(averages) {
+      var header = document.getElementById("averagesHeader");
+      var th = header.getElementsByTagName("th");
+      th[1].innerHTML = averages.rating.toFixed(2);
+      th[2].innerHTML = averages.adr.toFixed(2);
+      th[3].innerHTML = averages.kdd.toFixed(2);
+      th[4].innerHTML = averages.kpr.toFixed(2);
+      th[5].innerHTML = averages.kpr_t.toFixed(2);
+      th[6].innerHTML = averages.kpr_ct.toFixed(2);
+      th[7].innerHTML = averages.trades.toFixed(2);
+      th[8].innerHTML = averages.hs.toFixed(2);
+      th[9].innerHTML = averages.kills.toFixed(2);
+      th[10].innerHTML = averages.assists.toFixed(2);
+      th[11].innerHTML = averages.deaths.toFixed(2);
+      th[12].innerHTML = averages.clutches.toFixed(2);
+    }
+
+    function filter() {
+      var table = document.getElementById("statsTable");
+      var tr = table.getElementsByTagName("tr");
+      var resultsInput = document.getElementById("resultsFilter");
+      var mapInput = document.getElementById("mapFilter");
+      var startDateInput = document.getElementById("startDate");
+      var endDateInput = document.getElementById("endDate");
+      var resultsFilter = resultsInput.options[resultsInput.selectedIndex].value;
+      var mapsFilter = mapInput.options[mapInput.selectedIndex].value;
+      var startDateFilter = new Date(startDateInput.value);
+      var endDateFilter = new Date(endDateInput.value);
+      resultsFilter = resultsFilter.toLowerCase();
+      mapsFilter = mapsFilter.toUpperCase();
+      var averages = {
+        'rating':0,
+        'adr':0,
+        'kdd':0,
+        'kpr':0,
+        'kpr_t':0,
+        'kpr_ct':0,
+        'trades':0,
+        'hs':0,
+        'kills':0,
+        'assists':0,
+        'deaths':0,
+        'clutches':0,
+      }
+      var count = 0;
+      for(i = 2; i < tr.length; i++) {
+        if (tr[i].classList.contains(resultsFilter+"_row") || resultsFilter == '') {
+          td = tr[i].getElementsByTagName("td");
+          if (td[1]) {
+            if(new Date(td[0].innerHTML) > startDateFilter && new Date(td[0].innerHTML) < endDateFilter) {
+              if (td[1].innerHTML.toUpperCase().indexOf(mapsFilter) > -1 || mapsFilter == '') {
+                tr[i].style.display = "";
+                count++;
+                averages['rating'] += parseFloat(td[3].innerHTML);
+                averages['adr'] += parseFloat(td[4].innerHTML);
+                averages['kdd'] += parseFloat(td[5].innerHTML);
+                averages['kpr'] += parseFloat(td[6].innerHTML);
+                if(td[7].innerHTML == '') {
+                  averages['kpr_t'] += 0;
+                } else {
+                  averages['kpr_t'] += parseFloat(td[8].innerHTML);
+                }
+                if(td[8].innerHTML == '') {
+                  averages['kpr_ct'] += 0;
+                } else {
+                  averages['kpr_ct'] += parseFloat(td[8].innerHTML);
+                }
+                averages['trades'] += parseFloat(td[9].innerHTML);
+                averages['hs'] += parseFloat(td[10].innerHTML);
+                averages['kills'] += parseFloat(td[11].innerHTML);
+                averages['assists'] += parseFloat(td[12].innerHTML);
+                averages['deaths'] += parseFloat(td[13].innerHTML);
+                averages['clutches'] += parseFloat(td[14].innerHTML);
+              } else {
+                tr[i].style.display = "none";
+              }
+            } else {
+                tr[i].style.display = "none";
+            }
+          }
+        } else {
+          tr[i].style.display = "none";
+        }
+      }
+
+      averages['rating'] /= count;
+      averages['adr'] /= count;
+      averages['kdd'] /= count;
+      averages['kpr'] /= count;
+      averages['kpr_t'] /= count;
+      averages['kpr_ct'] /= count;
+      averages['trades'] /= count;
+      averages['hs'] /= count;
+      averages['kills'] /= count;
+      averages['assists'] /= count;
+      averages['deaths'] /= count;
+      averages['clutches'] /= count;
+      updateAverages(averages);
+    }
+
+    function format(date) {
+      return (date.getMonth() + 1) + "/" + date.getDate() + "/" + date.getFullYear();
+    }
+
+    function test() {
+      var input = document.getElementById("endDate");
+      var date = new Date(input.value);
+      alert(format(date));
+    }
+
+    function getMaps() {
+      alert("pee");
+      var table = document.getElementById("statsTable");
+      var tr = table.getElementsByTagName("tr");
+      var mapsInput = document.getElementById("mapFilter");
+      var mapsFilter = mapsInput.options[mapsInput.selectedIndex].value;
+      var data = {
+        "labels": ["Cache", "Overpass", "Inferno", "Nuke", "Mirage", "Train", "Cobblestone", "Dust II"],
+        "datasets": [{"label": "Maps", "data":[0,0,0,0,0,0,0,0], "backgroundColor": ["rgb(252, 186, 3)", "rgb(19, 230, 11)", "rgb(6, 116, 207)", "rgb(104, 7, 184)", "rgb(184, 7, 152)", "rgb(184, 7, 7)", "rgb(235, 130, 2)", "rgb(52, 191, 138)"]}]
+      };
+      for(i = 0; i < tr.length; i++) {
+        var td = tr[i].getElementsByTagName("td");
+        alert(td[0].innerHTML);
+        if(td[1]) {
+          var index = data["labels"].indexOf(td[1].innerHTML);
+          data["datasets"][0]["Maps"][index] +=1;
+        }
+      }
+      var ctx = document.getElementById("myChart");
+      var chart = new Chart(ctx, {
+          "type": "pie",
+          "data": data,
+      });
+    }
