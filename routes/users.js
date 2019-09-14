@@ -22,6 +22,7 @@ router.get('/:id', function(req, res) {
       })
 
       var averages = {'rating': 0, 'adr':0, 'kdd':0, 'kpr':0, 'kpr_t':0, 'kpr_ct':0, 'trades':0, 'hs':0, 'kills':0, 'assists':0, 'deaths':0, 'clutches':0};
+      var maps = {'Cache':0, 'Cobblestone':0, 'Train':0, 'Mirage':0, 'Nuke':0, 'Overpass':0, 'Vertigo':0, 'Inferno':0, 'Dust II':0};
       for(var i = 0; i < list_stats.length; i++) {
         averages['rating'] += list_stats[i].rating;
         averages['adr'] += list_stats[i].adr;
@@ -35,6 +36,7 @@ router.get('/:id', function(req, res) {
         averages['assists'] += list_stats[i].assists;
         averages['deaths'] += list_stats[i].deaths;
         averages['clutches'] += list_stats[i].clutches;
+        maps[list_stats[i].match.map] += 1;
       }
 
       averages['rating'] /= list_stats.length;
@@ -49,7 +51,7 @@ router.get('/:id', function(req, res) {
       averages['assists'] /= list_stats.length;
       averages['deaths'] /= list_stats.length;
       averages['clutches'] /= list_stats.length;
-      res.render('user', {title: ' Stats', stats_list: list_stats, averages: averages});
+      res.render('user', {title: ' Stats', stats_list: list_stats, averages: averages, maps: [maps['Cache'], maps['Cobblestone'], maps['Train'], maps['Nuke'], maps['Mirage'], maps['Vertigo'], maps['Overpass'], maps['Dust II'], maps['Inferno']]});
   });
 });
 

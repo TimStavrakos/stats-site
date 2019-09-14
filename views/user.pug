@@ -2,8 +2,8 @@ extends layout
 
 block content
   .content-wrapper
-  .charts
-    canvas#myChart
+  //.charts
+    //canvas#myChart
   .filters-wrapper
     select#mapFilter.Filter(onchange='filter()')
       option(value='' disabled='' selected='') Map Filter
@@ -79,7 +79,7 @@ block content
 
   script.
     window.onload = function() {todaysDate();getMaps();}
-    window.onready = function() {getMaps();}
+    //window.onready = function() {getMaps();}
 
     function todaysDate() {
       var today = new Date();
@@ -198,7 +198,6 @@ block content
     }
 
     function getMaps() {
-      alert("pee");
       var table = document.getElementById("statsTable");
       var tr = table.getElementsByTagName("tr");
       var mapsInput = document.getElementById("mapFilter");
@@ -221,3 +220,53 @@ block content
           "data": data,
       });
     }
+
+    var ctx = document.getElementById("myChart");
+    var chart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        "datasets": [{
+          "data": [1,2,3,1,2,4,5,1,2]
+        }],
+        labels: [
+          'Cache',
+          'Cobblestone',
+          'Train',
+          'Nuke',
+          'Mirage',
+          'Vertigo',
+          'Overpass',
+          'Dust II',
+          'Inferno'
+        ]
+      }
+    });
+    /*var ctx = document.getElementById("myChart");
+    var chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            //labels: ["January", "February", "March"]
+            datasets: [{
+                label: 'test Ratings',
+                data: [{
+                    x: 2,
+                    y: 1
+                }, {
+                    x: 10,
+                    y:5
+                }, {
+                    x: 15,
+                    y: 1
+                }],
+                fill: false,
+                lineTension:0
+            }]
+        },
+        options: {
+            scales: {
+                xAxes: [{
+                    type: 'linear',
+                }]
+            }
+        }
+    });*/

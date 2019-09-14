@@ -44,6 +44,9 @@ StatsInstanceSchema
 StatsInstanceSchema
 .virtual('kda')
 .get(function () {
+  if (this.deaths == 0){
+    return ((this.kills + .5*this.assists)/1);
+  }
   return ((this.kills + .5*this.assists)/this.deaths);
 });
 
