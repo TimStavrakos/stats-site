@@ -115,10 +115,115 @@ router.get('/Shared', function(req, res, next) {
           }
         }
       }
-      
+
       res.render('shared', { title: 'Shared', matches: matches, list: player_list, averages:averages});
 
   });
 });
+
+router.get('/leaderboards', function(req, res, next) {
+  async.parallel({
+    tim: function(callback) {
+      StatsInstance.find({ 'user': 'Tim'})
+      .populate('match')
+      .sort([['match', 'ascending']])
+      .exec(callback)
+    },
+    ryan: function(callback) {
+      StatsInstance.find({ 'user': 'Ryan'})
+      .populate('match')
+      .sort([['match', 'ascending']])
+      .exec(callback)
+    },
+    collin: function(callback) {
+      StatsInstance.find({ 'user': 'Collin'})
+      .populate('match')
+      .sort([['match', 'ascending']])
+      .exec(callback)
+    },
+    cal: function(callback) {
+      StatsInstance.find({ 'user': 'Cal'})
+      .populate('match')
+      .sort([['match', 'ascending']])
+      .exec(callback)
+    },
+    sean: function(callback) {
+      StatsInstance.find({ 'user': 'Sean'})
+      .populate('match')
+      .sort([['match', 'ascending']])
+      .exec(callback)
+    },
+    josh: function(callback) {
+      StatsInstance.find({ 'user': 'Josh'})
+      .populate('match')
+      .sort([['match', 'ascending']])
+      .exec(callback)
+    }
+  }, function (err, results) {
+    if (err) {return next(err);}
+    var today = new Date(2019, 7, 1);
+    var averages = {};
+    averages['Tim'] = leaderboardsHelperFunction(results.tim, today);
+    averages['Ryan'] = leaderboardsHelperFunction(results.ryan, today);
+    averages['Collin'] = leaderboardsHelperFunction(results.collin, today);
+    averages['Sean'] = leaderboardsHelperFunction(results.sean, today);
+    averages['Cal'] = leaderboardsHelperFunction(results.cal, today);
+    averages['Josh'] = leaderboardsHelperFunction(results.josh, today);
+    var ratings = [];
+    var kdr  = [];
+    var kda = [];
+    var hs = [];
+    var adr = [];
+    var kpr = [];
+    for (player in averages) {
+      ratings.push({'player': player, 'stat': averages[player].rating});
+      kdr.push({'player': player, 'stat': averages[player].kdr});
+      kda.push({'player': player, 'stat': averages[player].kda});
+      hs.push({'player': player, 'stat': averages[player].hs});
+      adr.push({'player': player, 'stat': averages[player].adr});
+      kpr.push({'player': player, 'stat': averages[player].kpr});
+    }
+    ratings.sort(compare_stats);
+    kdr.sort(compare_stats);
+    kda.sort(compare_stats);
+    hs.sort(compare_stats);
+    adr.sort(compare_stats);
+    kpr.sort(compare_stats);
+
+    res.render('leaderboards', { title: 'Leaderboards', ratings:ratings, kdr:kdr, kda:kda, hs:hs, adr:adr, kpr:kpr});
+  });
+});
+
+function leaderboardsHelperFunction(statsObject, date) {
+  var averages = {'rating':0, 'kdr':0, 'kda':0, 'hs':0, 'adr':0, 'kpr':0, 'count':0};
+  for(var i = 0; i < statsObject.length; i++){
+    var matchDate = new Date(statsObject[i].match.date);
+    if((matchDate.getMonth() == date.getMonth()) && (matchDate.getDay() == date.getDay())) {
+      averages.rating += statsObject[i].rating;
+      averages.kdr += statsObject[i].kdr;
+      averages.kda += statsObject[i].kda;
+      averages.hs += statsObject[i].hs;
+      averages.adr += statsObject[i].adr;
+      averages.kpr += statsObject[i].kpr;
+      averages.count += 1;
+    }
+  }
+  for (stat in averages) {
+    averages[stat] /= averages.count;
+  }
+  return averages;
+}
+
+function compare_stats(a,b) {
+  if(isNaN(a.stat)) {
+    if(isNaN(b.stat)) {
+      return 0;
+    }
+    return 1;
+  } else if(isNaN(b.stat)) {
+    return -1;
+  }
+  return b.stat-a.stat;
+}
 
 module.exports = router;

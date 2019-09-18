@@ -125,6 +125,15 @@ li {
   width: 100%;
 }
 
+.first-row, .second-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.first-row.table, .second-row.table {
+  padding: 10px;
+}
+
 tr.win_row {
   background-color: rgb(115, 195, 110);
 }

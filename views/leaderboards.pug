@@ -1,0 +1,67 @@
+extends layout
+
+block content
+  .content-wrapper
+    .first-row
+      table#rating-table
+        tr
+          th(colspan='2') Rating
+        each player in ratings
+          tr
+            td= player.player
+            if player.stat == 'undefined'
+              td
+            else
+              td= player.stat.toFixed(2)
+      table#adr-table
+        tr
+          th(colspan='2') ADR
+        each player in adr
+          tr
+            td= player.player
+            if player.stat == 'undefined'
+              td
+            else
+              td= player.stat.toFixed(2)
+      table#hs-table
+        tr
+          th(colspan='2') HS%
+        each player in hs
+          tr
+            td= player.player
+            if player.stat == 'undefined'
+              td
+            else
+              td= player.stat.toFixed(2)
+
+    .second-row
+      table#kpr-table
+        tr
+          th(colspan='2') KPR
+        each player in kpr
+          tr
+            td= player.player
+            if player.stat == 'undefined'
+              td
+            else
+              td= player.stat.toFixed(2)
+      table#kdr-table
+        tr
+          th(colspan='2') KDR
+        each player in kdr
+          tr
+            td= player.player
+            if player.stat == 'undefined'
+              td
+            else
+              td= player.stat.toFixed(2)
+      table#kda-table
+        tr
+          th(colspan='2') KDA
+        each player in kda
+          tr
+            td= player.player
+            if player.stat == 'undefined'
+              td
+            else
+              td= player.stat.toFixed(2)
