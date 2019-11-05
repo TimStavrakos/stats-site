@@ -11,7 +11,11 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/:id', function(req, res) {
-
+  //query = req.query;
+  var maps_filter = req.query.map;
+  var end_date = req.query.endDate;
+  var start_date = req.query.startDate;
+  var result_filter = req.query.result;
   StatsInstance.find({'user': req.params.id})
     .populate('match')
     .sort([['match.date', 'ascending']])
@@ -20,6 +24,21 @@ router.get('/:id', function(req, res) {
       list_stats.sort(function(a,b) {
         return new Date(b.match.date) - new Date(a.match.date);
       })
+
+      if(maps_filter == undefined){
+        maps_filter = ["Cache", "Cobblestone", "Dust II", "Inferno", "Mirage", "Nuke", "Overpass", "Train", "Vertigo"];
+      }
+      if(result_filter == undefined){
+        result_filter = ['win', 'loss', 'draw'];
+      }
+      for(var i = 0; i < list_stats.length; i++){
+        var match = list_stats[i].match;
+        var result = match.score[0] != match.score[1] ? (match.score[0] > match.score[1] ? 'win' : 'loss') : 'draw';
+        if(!maps_filter.includes(match.map) || new Date(match.date) > new Date(end_date) || new Date(match.date) < new Date(start_date) || !result_filter.includes(result)){
+          list_stats.splice(i, 1);
+          i--;
+        }
+      }
 
       var averages = {'rating': 0, 'adr':0, 'kdd':0, 'kpr':0, 'kpr_t':0, 'kpr_ct':0, 'trades':0, 'hs':0, 'kills':0, 'assists':0, 'deaths':0, 'clutches':0};
       var maps = {'Cache':0, 'Cobblestone':0, 'Train':0, 'Mirage':0, 'Nuke':0, 'Overpass':0, 'Vertigo':0, 'Inferno':0, 'Dust II':0};
@@ -51,7 +70,7 @@ router.get('/:id', function(req, res) {
       averages['assists'] /= list_stats.length;
       averages['deaths'] /= list_stats.length;
       averages['clutches'] /= list_stats.length;
-      res.render('user', {title: ' Stats', stats_list: list_stats, averages: averages, maps: [maps['Cache'], maps['Cobblestone'], maps['Train'], maps['Nuke'], maps['Mirage'], maps['Vertigo'], maps['Overpass'], maps['Dust II'], maps['Inferno']]});
+      res.render('user', {title: ' Stats', user: req.params.id, stats_list: list_stats, averages: averages, maps: [maps['Cache'], maps['Cobblestone'], maps['Train'], maps['Nuke'], maps['Mirage'], maps['Vertigo'], maps['Overpass'], maps['Dust II'], maps['Inferno']]});
   });
 });
 

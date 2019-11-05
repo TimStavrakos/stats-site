@@ -2,37 +2,40 @@ extends layout
 
 block content
   .content-wrapper
+    .filters-wrapper
+      form(action="/leaderboards" method="GET")
+        select(name="month")
+          each month, index in months
+            if index == 0
+              option(selected value=month) #{month}
+            else
+              option(value=month) #{month}
+        input(type="submit" action="submit")
     .first-row
       table#rating-table
         tr
           th(colspan='2') Rating
         each player in ratings
           tr
+          if(!isNaN(player.stat))
             td= player.player
-            if player.stat == 'undefined'
-              td
-            else
-              td= player.stat.toFixed(2)
+            td= player.stat.toFixed(2)]
       table#adr-table
         tr
           th(colspan='2') ADR
         each player in adr
           tr
+          if(!isNaN(player.stat))
             td= player.player
-            if player.stat == 'undefined'
-              td
-            else
-              td= player.stat.toFixed(2)
+            td= player.stat.toFixed(2)
       table#hs-table
         tr
           th(colspan='2') HS%
         each player in hs
           tr
+          if(!isNaN(player.stat))
             td= player.player
-            if player.stat == 'undefined'
-              td
-            else
-              td= player.stat.toFixed(2)
+            td= player.stat.toFixed(2)
 
     .second-row
       table#kpr-table
@@ -40,28 +43,22 @@ block content
           th(colspan='2') KPR
         each player in kpr
           tr
+          if(!isNaN(player.stat))
             td= player.player
-            if player.stat == 'undefined'
-              td
-            else
-              td= player.stat.toFixed(2)
+            td= player.stat.toFixed(2)
       table#kdr-table
         tr
           th(colspan='2') KDR
         each player in kdr
           tr
+          if(!isNaN(player.stat))
             td= player.player
-            if player.stat == 'undefined'
-              td
-            else
-              td= player.stat.toFixed(2)
+            td= player.stat.toFixed(2)
       table#kda-table
         tr
           th(colspan='2') KDA
         each player in kda
           tr
+          if(!isNaN(player.stat))
             td= player.player
-            if player.stat == 'undefined'
-              td
-            else
-              td= player.stat.toFixed(2)
+            td= player.stat.toFixed(2)

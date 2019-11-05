@@ -10,7 +10,7 @@ var usersRouter = require('./routes/users');
 
 
 var app = express();
-var mongoDB = 'mongodb://localhost:27017/statsDB';
+var mongoDB = 'mongodb://localhost:27017/test_statsDB';
 mongoose.connect(mongoDB, {useNewUrlParser: true});
 
 //Get the default connection

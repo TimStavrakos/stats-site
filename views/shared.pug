@@ -4,23 +4,25 @@ block content
   .content-wrapper
   .charts
   .filters-wrapper
-    select#mapFilter.Filter(onchange='filter()')
-      option(value='' disabled='' selected='') Map Filter
-      option(value='Cache') Cache
-      option(value='Cobblestone') Cobblestone
-      option(value='Dust II') Dust II
-      option(value='Inferno') Inferno
-      option(value='Mirage') Mirage
-      option(value='Nuke') Nuke
-      option(value='Overpass') Overpass
-      option(value='Train') Train
-    select#resultsFilter.Filter(onchange='filter()')
-      option(value='' disabled='' selected='') Results Filter
-      option(value='win') Win
-      option(value='loss') Loss
-      option(value='draw') Draw
-    input#startDate.Filter(type="date" value="2018-02-07" onchange="filter()")
-    input#endDate.Filter(type="date" onchange="filter()")
+    form(action="/Shared" method='GET')
+      select(name="map" multiple)
+        option(value='' disabled='' selected='') Map Filter
+        option(value='Cache') Cache
+        option(value='Cobblestone') Cobblestone
+        option(value='Dust II') Dust II
+        option(value='Inferno') Inferno
+        option(value='Mirage') Mirage
+        option(value='Nuke') Nuke
+        option(value='Overpass') Overpass
+        option(value='Train') Train
+      select(name="result")
+        option(value='' disabled='' selected='') Results Filter
+        option(value='win') Win
+        option(value='loss') Loss
+        option(value='draw') Draw
+      input#startDate.Filter(type="date" name="startDate" value="2018-02-07")
+      input#endDate.Filter(type="date" name="endDate")
+      input(type="submit" action="Submit")
   .table-wrapper
     table#statsTable
       tr

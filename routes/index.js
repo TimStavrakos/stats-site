@@ -11,6 +11,10 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/Shared', function(req, res, next) {
+  var maps_filter = req.query.map;
+  var end_date = req.query.endDate;
+  var start_date = req.query.startDate;
+  var result_filter = req.query.result;
   async.parallel({
     matches: function(callback) {
       Match.find()
@@ -103,6 +107,28 @@ router.get('/Shared', function(req, res, next) {
           josh_configured.push('');
         }
       }
+
+      if(maps_filter == undefined){
+        maps_filter = ["Cache", "Cobblestone", "Dust II", "Inferno", "Mirage", "Nuke", "Overpass", "Train", "Vertigo"];
+      }
+      if(result_filter == undefined){
+        result_filter = ['win', 'loss', 'draw'];
+      }
+      for(var i = 0; i < matches.length; i++){
+        var match = matches[i];
+        var result = match.score[0] != match.score[1] ? (match.score[0] > match.score[1] ? 'win' : 'loss') : 'draw';
+        if(!maps_filter.includes(match.map) || new Date(match.date) > new Date(end_date) || new Date(match.date) < new Date(start_date) || !result_filter.includes(result)){
+          matches.splice(i, 1);
+          i--;
+          tim_configured.splice(i,1);
+          ryan_configured.splice(i,1);
+          collin_configured.splice(i,1);
+          sean_configured.splice(i,1);
+          cal_configured.splice(i,1);
+          josh_configured.splice(i,1);
+        }
+      }
+
       var player_list = [tim_configured, ryan_configured, collin_configured, sean_configured, cal_configured, josh_configured];
       var averages = [{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0}];
       for(var i = 0; i < player_list.length; i++){
@@ -122,7 +148,12 @@ router.get('/Shared', function(req, res, next) {
 });
 
 router.get('/leaderboards', function(req, res, next) {
+  var date = req.query.month;
   async.parallel({
+    matches: function(callback) {
+      Match.find()
+      .exec(callback)
+    },
     tim: function(callback) {
       StatsInstance.find({ 'user': 'Tim'})
       .populate('match')
@@ -161,20 +192,38 @@ router.get('/leaderboards', function(req, res, next) {
     }
   }, function (err, results) {
     if (err) {return next(err);}
-    var today = new Date(2019, 7, 1);
+    var date_filter = new Date(date);
+    if(date_filter == undefined){
+      date_filter = new Date();
+    }
     var averages = {};
-    averages['Tim'] = leaderboardsHelperFunction(results.tim, today);
-    averages['Ryan'] = leaderboardsHelperFunction(results.ryan, today);
-    averages['Collin'] = leaderboardsHelperFunction(results.collin, today);
-    averages['Sean'] = leaderboardsHelperFunction(results.sean, today);
-    averages['Cal'] = leaderboardsHelperFunction(results.cal, today);
-    averages['Josh'] = leaderboardsHelperFunction(results.josh, today);
+    averages['Tim'] = leaderboardsHelperFunction(results.tim, date_filter);
+    averages['Ryan'] = leaderboardsHelperFunction(results.ryan, date_filter);
+    averages['Collin'] = leaderboardsHelperFunction(results.collin, date_filter);
+    averages['Sean'] = leaderboardsHelperFunction(results.sean, date_filter);
+    averages['Cal'] = leaderboardsHelperFunction(results.cal, date_filter);
+    averages['Josh'] = leaderboardsHelperFunction(results.josh, date_filter);
     var ratings = [];
     var kdr  = [];
     var kda = [];
     var hs = [];
     var adr = [];
     var kpr = [];
+    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    var month_years = [];
+    var matches = results.matches;
+    matches.sort(function(a,b) {
+      return new Date(b.date) - new Date(a.date);
+    });
+    for (match in matches) {
+      match_date = new Date(matches[match].date);
+      console.log(match_date);
+      date_string = months[match_date.getMonth()] + " " + match_date.getFullYear();
+      console.log(date_string);
+      if(!month_years.includes(date_string)){
+        month_years.push(date_string);
+      }
+    }
     for (player in averages) {
       ratings.push({'player': player, 'stat': averages[player].rating});
       kdr.push({'player': player, 'stat': averages[player].kdr});
@@ -190,7 +239,7 @@ router.get('/leaderboards', function(req, res, next) {
     adr.sort(compare_stats);
     kpr.sort(compare_stats);
 
-    res.render('leaderboards', { title: 'Leaderboards', ratings:ratings, kdr:kdr, kda:kda, hs:hs, adr:adr, kpr:kpr});
+    res.render('leaderboards', { title: 'Leaderboards', ratings:ratings, kdr:kdr, kda:kda, hs:hs, adr:adr, kpr:kpr, months: month_years});
   });
 });
 
@@ -198,7 +247,7 @@ function leaderboardsHelperFunction(statsObject, date) {
   var averages = {'rating':0, 'kdr':0, 'kda':0, 'hs':0, 'adr':0, 'kpr':0, 'count':0};
   for(var i = 0; i < statsObject.length; i++){
     var matchDate = new Date(statsObject[i].match.date);
-    if((matchDate.getMonth() == date.getMonth()) && (matchDate.getDay() == date.getDay())) {
+    if((matchDate.getMonth() == date.getMonth()) && (matchDate.getFullYear() == date.getFullYear())) {
       averages.rating += statsObject[i].rating;
       averages.kdr += statsObject[i].kdr;
       averages.kda += statsObject[i].kda;
