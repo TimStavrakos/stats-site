@@ -25,7 +25,17 @@ var StatsInstanceSchema = new Schema(
     clutch1v2: {type: Number},
     clutch1v3: {type: Number},
     clutch1v4: {type: Number},
-    clutch1v5: {type: Number}
+    clutch1v5: {type: Number},
+    double_0: {type: Boolean},
+    reverse_double: {type: Boolean},
+    assisters: {
+      type: Map,
+      of: Number
+    },
+    assisted: {
+      type: Map,
+      of: Number
+    }
   }
 );
 

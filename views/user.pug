@@ -2,7 +2,13 @@ extends layout
 
 block content
   .content-wrapper
-  //.charts
+  .charts
+    h1 Best Buddies
+    p Most Assited By: #{assister}-#{assists_num}
+    p Most Assisted: #{assisted}-#{assisted_num}
+    p 40 bombs: #{k_40}
+    p 30 bombs: #{k_30}
+    p sub 10: #{sub_10}
     //canvas#myChart
   .filters-wrapper
     - var this_user= "/users/" + user
@@ -22,7 +28,7 @@ block content
         option(value='win') Win
         option(value='loss') Loss
         option(value='draw') Draw
-      input#startDate.Filter(type="date" name="startDate" value="2018-02-07")
+      input#startDate.Filter(type="date" name="startDate" value="2016-10-07")
       input#endDate.Filter(type="date" name="endDate")
       input(type="submit" action="Submit")
   .table-wrapper

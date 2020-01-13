@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  .content-wrapper
+    .hall-of-fame
+      p Most Kills Cache - #{max.Cache[1]} : #{max.Cache[0]}
+      p Most Kills Cobblestone - #{max.Cobblestone[1]} : #{max.Cobblestone[0]}
+      p Most Kills Dust II - #{max["Dust II"][1]} : #{max["Dust II"][0]}
+      p Most Kills Inferno - #{max.Inferno[1]} : #{max.Inferno[0]}
+      p Most Kills Mirage - #{max.Mirage[1]} : #{max.Mirage[0]}
+      p Most Kills Nuke - #{max.Nuke[1]} : #{max.Nuke[0]}
+      p Most Kills Overpass - #{max.Overpass[1]} : #{max.Overpass[0]}
+      p Most Kills Train - #{max.Train[1]} : #{max.Train[0]}
+      p Most Kills Vertigo - #{max.Vertigo[1]} : #{max.Vertigo[0]}
+      p Most 7/0/0s - #{reverse_player} : #{reverse_double}

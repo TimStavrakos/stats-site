@@ -119,13 +119,13 @@ router.get('/Shared', function(req, res, next) {
         var result = match.score[0] != match.score[1] ? (match.score[0] > match.score[1] ? 'win' : 'loss') : 'draw';
         if(!maps_filter.includes(match.map) || new Date(match.date) > new Date(end_date) || new Date(match.date) < new Date(start_date) || !result_filter.includes(result)){
           matches.splice(i, 1);
-          i--;
           tim_configured.splice(i,1);
           ryan_configured.splice(i,1);
           collin_configured.splice(i,1);
           sean_configured.splice(i,1);
           cal_configured.splice(i,1);
           josh_configured.splice(i,1);
+          i--;
         }
       }
 
@@ -217,9 +217,7 @@ router.get('/leaderboards', function(req, res, next) {
     });
     for (match in matches) {
       match_date = new Date(matches[match].date);
-      console.log(match_date);
       date_string = months[match_date.getMonth()] + " " + match_date.getFullYear();
-      console.log(date_string);
       if(!month_years.includes(date_string)){
         month_years.push(date_string);
       }
@@ -240,6 +238,92 @@ router.get('/leaderboards', function(req, res, next) {
     kpr.sort(compare_stats);
 
     res.render('leaderboards', { title: 'Leaderboards', ratings:ratings, kdr:kdr, kda:kda, hs:hs, adr:adr, kpr:kpr, months: month_years});
+  });
+});
+
+router.get('/hall-of-fame', function(req, res, next) {
+  var maxes = {"Cache":[-1,""], "Cobblestone":[-1,""], "Dust II":[-1,""], "Inferno":[-1,""], "Mirage":[-1,""], "Nuke":[-1,""], "Overpass":[-1,""], "Train":[-1,""], "Vertigo":[-1,""]};
+  var reverse_double = {"Tim":0 , "Ryan":0, "Collin":0, "Sean":0, "Cal":0, "Sharfin":0, "Josh":0};
+  async.parallel({
+      matches: function(callback) {
+        Match.find()
+        .exec(callback)
+      },
+      players: function(callback) {
+        StatsInstance.find()
+        .populate('match')
+        .exec(callback)
+      }
+    }, function(err, results) {
+      if (err) {return next(err);}
+      var player_list = [];
+      player_list = results.players;
+      for(var i = 0; i < player_list.length; i++){
+        var current_map = player_list[i].match.map;
+        var current_kills = player_list[i].kills;
+        if(maxes[current_map][0] < current_kills){
+          maxes[current_map][0] = current_kills;
+          maxes[current_map][1] = player_list[i].user;
+        } else if (maxes[current_map][0] == current_kills) {
+          maxes[current_map][1] += ", " + player_list[i].user;
+        }
+      }
+      max_double = -1;
+      max_double_player = "";
+      for(var i = 0; i < player_list.length; i++) {
+        instance = player_list[i];
+        if(instance.reverse_double) {
+          reverse_double[instance.user] += 1
+        }
+        if(reverse_double[instance.user] > max_double) {
+          max_double = reverse_double[instance.user];
+          max_double_player = instance.user;
+        }
+      }
+      res.render('hall-of-fame', {title: 'Hall Of Fame', max: maxes, "reverse_player":max_double_player, "reverse_double": max_double});
+  });
+});
+
+router.get('/hall-of-shame', function(req, res, next) {
+  var maxes = {"Cache":[50,""], "Cobblestone":[50,""], "Dust II":[50,""], "Inferno":[50,""], "Mirage":[50,""], "Nuke":[50,""], "Overpass":[50,""], "Train":[50,""], "Vertigo":[50,""]};
+  var double_0 = {"Tim":0 , "Ryan":0, "Collin":0, "Sean":0, "Cal":0, "Sharfin":0, "Josh":0};
+  async.parallel({
+      matches: function(callback) {
+        Match.find()
+        .exec(callback)
+      },
+      players: function(callback) {
+        StatsInstance.find()
+        .populate('match')
+        .exec(callback)
+      }
+    }, function(err, results) {
+      if (err) {return next(err);}
+      var player_list = [];
+      player_list = results.players;
+      for(var i = 0; i < player_list.length; i++){
+        var current_map = player_list[i].match.map;
+        var current_kills = player_list[i].kills;
+        if(maxes[current_map][0] > current_kills){
+          maxes[current_map][0] = current_kills;
+          maxes[current_map][1] = player_list[i].user;
+        } else if (maxes[current_map][0] == current_kills) {
+          maxes[current_map][1] += ", " + player_list[i].user;
+        }
+      }
+      max_double = -1;
+      max_double_player = "";
+      for(var i = 0; i < player_list.length; i++) {
+        instance = player_list[i];
+        if(instance.double_0){
+          double_0[instance.user] += 1;
+        }
+        if(double_0[instance.user] > max_double){
+          max_double = double_0[instance.user];
+          max_double_player = instance.user;
+        }
+      }
+      res.render('hall-of-shame', {title: 'Hall Of Fame', max: maxes, "double_0": max_double, "double_player": max_double_player});
   });
 });
 

@@ -3,6 +3,32 @@ extends layout
 block content
   .content-wrapper
   .charts
+  //.table-wrapper
+    //table#mapsTable
+      //tr
+        //th
+        //th Tim
+        //th Ryan
+        //th Collin
+        //th Sean
+        //th Cal
+        //th Josh
+      //tr
+        //td Cache
+      //tr
+        //td Mirage
+      //tr
+        //td Dust II
+      //tr
+        //td Inferno
+      //tr
+        //td Overpass
+      //tr
+        //td Nuke
+      //tr
+        //td Cobblestone
+      //tr
+        //td Train
   .filters-wrapper
     form(action="/Shared" method='GET')
       select(name="map" multiple)
@@ -20,7 +46,7 @@ block content
         option(value='win') Win
         option(value='loss') Loss
         option(value='draw') Draw
-      input#startDate.Filter(type="date" name="startDate" value="2018-02-07")
+      input#startDate.Filter(type="date" name="startDate" value="2016-10-07")
       input#endDate.Filter(type="date" name="endDate")
       input(type="submit" action="Submit")
   .table-wrapper

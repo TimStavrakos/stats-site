@@ -8,7 +8,17 @@ var MatchSchema = new Schema(
     map: {type: String, required: true, max: 15},
     date: {type: Date, requied: true},
     score: [Number],
-    players: [{type: String, required: true}]
+    players: [{type: String, required: true}],
+    wins: [Number],
+    losses: [Number],
+    wins: {
+      type: Map,
+      of: Number
+    },
+    losses: {
+      type: Map,
+      of: Number
+    }
   }
 );
 
