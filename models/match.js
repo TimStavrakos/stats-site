@@ -11,13 +11,21 @@ var MatchSchema = new Schema(
     players: [{type: String, required: true}],
     wins: [Number],
     losses: [Number],
-    wins: {
-      type: Map,
-      of: Number
+    wins_buy: {
+      'Pistol round': Number,
+      'Anti-Eco': Number,
+      'Semi-Eco': Number,
+      'Eco': Number,
+      'Force buy': Number,
+      'Normal': Number
     },
-    losses: {
-      type: Map,
-      of: Number
+    loss_buy: {
+      'Pistol round': Number,
+      'Anti-Eco': Number,
+      'Semi-Eco': Number,
+      'Eco': Number,
+      'Force buy': Number,
+      'Normal': Number
     }
   }
 );

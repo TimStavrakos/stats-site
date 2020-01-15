@@ -6,11 +6,8 @@ var User = require('../models/user');
 var async = require('async');
 
 /* GET home page. */
-router.get('/', function(req, res, next) {
-  res.render('index', { title: 'Express' });
-});
 
-router.get('/Shared', function(req, res, next) {
+router.get('/', function(req, res, next) {
   var maps_filter = req.query.map;
   var end_date = req.query.endDate;
   var start_date = req.query.startDate;
@@ -145,6 +142,54 @@ router.get('/Shared', function(req, res, next) {
       res.render('shared', { title: 'Shared', matches: matches, list: player_list, averages:averages});
 
   });
+});
+
+router.get('/rounds', function(req, res, next) {
+  var maps_filter = req.query.map;
+  var end_date = req.query.endDate;
+  var start_date = req.query.startDate;
+  var result_filter = req.query.result;
+  Match.find()
+    .sort([['date', 'ascending']])
+    .exec(function(err, stats) {
+      if (err) {return next(err);}
+      stats.sort(function(a,b) {
+        return new Date(b.date) - new Date(a.date);
+      })
+
+      if(maps_filter == undefined){
+        maps_filter = ["Cache", "Cobblestone", "Dust II", "Inferno", "Mirage", "Nuke", "Overpass", "Train", "Vertigo"];
+      }
+      if(result_filter == undefined){
+        result_filter = ['win', 'loss', 'draw'];
+      }
+      for(var i = 0; i < stats.length; i++){
+        var match = stats[i];
+        var result = match.score[0] != match.score[1] ? (match.score[0] > match.score[1] ? 'win' : 'loss') : 'draw';
+        if(!maps_filter.includes(match.map) || new Date(match.date) > new Date(end_date) || new Date(match.date) < new Date(start_date) || !result_filter.includes(result)){
+          stats.splice(i, 1);
+          i--;
+        }
+      }
+
+      var averages = {'Pistol': [0,0], 'Eco': [0,0], 'Anti-Eco': [0,0], 'Semi-Eco': [0,0], 'Force': [0,0], 'Normal': [0,0]};
+      for(var i = 0; i < stats.length; i++) {
+        averages['Pistol'][0] += stats[i]['wins_buy']['Pistol round'];
+        averages['Eco'][0] += stats[i].wins_buy['Eco'];
+        averages['Anti-Eco'][0] += stats[i].wins_buy['Anti-Eco'];
+        averages['Semi-Eco'][0] += stats[i].wins_buy['Semi-Eco'];
+        averages['Force'][0] += stats[i].wins_buy['Force buy'];
+        averages['Normal'][0] += stats[i].wins_buy['Normal'];
+        averages['Pistol'][1] += stats[i].loss_buy['Pistol round'];
+        averages['Eco'][1] += stats[i].loss_buy['Eco'];
+        averages['Anti-Eco'][1] += stats[i].loss_buy['Anti-Eco'];
+        averages['Semi-Eco'][1] += stats[i].loss_buy['Semi-Eco'];
+        averages['Force'][1] += stats[i].loss_buy['Force buy'];
+        averages['Normal'][1] += stats[i].loss_buy['Normal'];
+      }
+      console.log(stats[1]['loss_buy']);
+      res.render('round_wins', {title: 'Rounds', matches: stats, averages: averages});
+    })
 });
 
 router.get('/leaderboards', function(req, res, next) {
