@@ -47,7 +47,17 @@ router.get('/:id', function(req, res) {
       var k_40 = 0;
       var k_30 = 0;
       var sub_10 = 0;
+      var wins = 0;
+      var losses = 0;
+      var ties = 0;
       for(var i = 0; i < list_stats.length; i++) {
+        if (list_stats[i].match.score[0] > list_stats[i].match.score[1]) {
+          wins += 1;
+        } else if (list_stats[i].match.score[0] < list_stats[i].match.score[1]) {
+          losses += 1;
+        } else {
+          ties += 1;
+        }
         averages['rating'] += list_stats[i].rating;
         averages['adr'] += list_stats[i].adr;
         averages['kdd'] += list_stats[i].kdd;
@@ -114,7 +124,7 @@ router.get('/:id', function(req, res) {
       averages['assists']  /= list_stats.length;
       averages['deaths']   /= list_stats.length;
       averages['clutches'] /= list_stats.length;
-      res.render('user', {title: ' Stats', user: req.params.id, stats_list: list_stats, averages: averages, maps: [maps['Cache'], maps['Cobblestone'], maps['Train'], maps['Nuke'], maps['Mirage'], maps['Vertigo'], maps['Overpass'], maps['Dust II'], maps['Inferno']], "assister": max_assister, "assists_num": assisters[max_assister][0].toFixed(2), "assisted": max_assisted, "assisted_num": assisted[max_assisted][0].toFixed(2), "k_30": k_30, "k_40": k_40, "sub_10": sub_10});
+      res.render('user', {title: ' Stats', user: req.params.id, stats_list: list_stats, averages: averages, maps: [maps['Cache'], maps['Cobblestone'], maps['Train'], maps['Nuke'], maps['Mirage'], maps['Vertigo'], maps['Overpass'], maps['Dust II'], maps['Inferno']], "assister": max_assister, "assists_num": assisters[max_assister][0].toFixed(2), "assisted": max_assisted, "assisted_num": assisted[max_assisted][0].toFixed(2), "k_30": k_30, "k_40": k_40, "sub_10": sub_10, win_per: (wins/list_stats.length).toFixed(3)*100, loss_per:(losses/list_stats.length).toFixed(3)*100, tie_per:(ties/list_stats.length).toFixed(3)*100} );
   });
 });
 
