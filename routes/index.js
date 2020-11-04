@@ -32,8 +32,8 @@ router.get('/', function(req, res, next) {
       .sort([['match', 'ascending']])
       .exec(callback)
     },
-    cal: function(callback) {
-      StatsInstance.find({ 'user': 'Cal'})
+    jack: function(callback) {
+      StatsInstance.find({ 'user': 'Jack'})
       .sort([['match', 'ascending']])
       .exec(callback)
     },
@@ -42,8 +42,8 @@ router.get('/', function(req, res, next) {
       .sort([['match', 'ascending']])
       .exec(callback)
     },
-    josh: function(callback) {
-      StatsInstance.find({ 'user': 'Josh'})
+    connor: function(callback) {
+      StatsInstance.find({ 'user': 'Connor'})
       .sort([['match', 'ascending']])
       .exec(callback)
     },
@@ -53,18 +53,18 @@ router.get('/', function(req, res, next) {
       var tim = results.tim.sort(function(a,b){return b.match-a.match;});
       var ryan = results.ryan.sort(function(a,b){return b.match-a.match;});
       var collin = results.collin.sort(function(a,b){return b.match-a.match;});
-      var cal = results.cal.sort(function(a,b){return b.match-a.match;});
+      var jack = results.jack.sort(function(a,b){return b.match-a.match;});
       var sean = results.sean.sort(function(a,b){return b.match-a.match;});
-      var josh = results.josh.sort(function(a,b){return b.match-a.match;});
+      var connor = results.connor.sort(function(a,b){return b.match-a.match;});
       matches.sort(function(a,b) {
         return new Date(b.date) - new Date(a.date);
       });
       var tim_configured = [];
       var ryan_configured = [];
       var collin_configured = [];
-      var cal_configured = [];
+      var jack_configured = [];
       var sean_configured = [];
-      var josh_configured = [];
+      var connor_configured = [];
       for (match in matches) {
         var match_id = matches[match]._id;
         var tim_instance = tim.find(instance => {return instance.match + '' == match_id + '';});
@@ -85,11 +85,11 @@ router.get('/', function(req, res, next) {
         } else {
           collin_configured.push('');
         }
-        var cal_instance = cal.find(instance => {return instance.match + '' == match_id + '';});
-        if(typeof(cal_instance) != "undefined") {
-          cal_configured.push(cal_instance);
+        var jack_instance = jack.find(instance => {return instance.match + '' == match_id + '';});
+        if(typeof(jack_instance) != "undefined") {
+          jack_configured.push(jack_instance);
         } else {
-          cal_configured.push('');
+          jack_configured.push('');
         }
         var sean_instance = sean.find(instance => {return instance.match + '' == match_id + '';});
         if(typeof(sean_instance) != "undefined") {
@@ -97,11 +97,11 @@ router.get('/', function(req, res, next) {
         } else {
           sean_configured.push('');
         }
-        var josh_instance = josh.find(instance => {return instance.match + '' == match_id + '';});
-        if(typeof(josh_instance) != "undefined") {
-          josh_configured.push(josh_instance);
+        var connor_instance = connor.find(instance => {return instance.match + '' == match_id + '';});
+        if(typeof(connor_instance) != "undefined") {
+          connor_configured.push(connor_instance);
         } else {
-          josh_configured.push('');
+          connor_configured.push('');
         }
       }
 
@@ -120,13 +120,13 @@ router.get('/', function(req, res, next) {
           ryan_configured.splice(i,1);
           collin_configured.splice(i,1);
           sean_configured.splice(i,1);
-          cal_configured.splice(i,1);
-          josh_configured.splice(i,1);
+          jack_configured.splice(i,1);
+          connor_configured.splice(i,1);
           i--;
         }
       }
 
-      var player_list = [tim_configured, ryan_configured, collin_configured, sean_configured, cal_configured, josh_configured];
+      var player_list = [tim_configured, ryan_configured, collin_configured, sean_configured, jack_configured, connor_configured];
       var averages = [{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0}];
       for(var i = 0; i < player_list.length; i++){
         for(match in player_list[i]){
@@ -217,8 +217,8 @@ router.get('/leaderboards', function(req, res, next) {
       .sort([['match', 'ascending']])
       .exec(callback)
     },
-    cal: function(callback) {
-      StatsInstance.find({ 'user': 'Cal'})
+    jack: function(callback) {
+      StatsInstance.find({ 'user': 'Jack'})
       .populate('match')
       .sort([['match', 'ascending']])
       .exec(callback)
@@ -229,8 +229,8 @@ router.get('/leaderboards', function(req, res, next) {
       .sort([['match', 'ascending']])
       .exec(callback)
     },
-    josh: function(callback) {
-      StatsInstance.find({ 'user': 'Josh'})
+    connor: function(callback) {
+      StatsInstance.find({ 'user': 'Connor'})
       .populate('match')
       .sort([['match', 'ascending']])
       .exec(callback)
@@ -246,8 +246,8 @@ router.get('/leaderboards', function(req, res, next) {
     averages['Ryan'] = leaderboardsHelperFunction(results.ryan, date_filter);
     averages['Collin'] = leaderboardsHelperFunction(results.collin, date_filter);
     averages['Sean'] = leaderboardsHelperFunction(results.sean, date_filter);
-    averages['Cal'] = leaderboardsHelperFunction(results.cal, date_filter);
-    averages['Josh'] = leaderboardsHelperFunction(results.josh, date_filter);
+    averages['Jack'] = leaderboardsHelperFunction(results.jack, date_filter);
+    averages['Connor'] = leaderboardsHelperFunction(results.connor, date_filter);
     var ratings = [];
     var kdr  = [];
     var kda = [];
@@ -288,7 +288,7 @@ router.get('/leaderboards', function(req, res, next) {
 
 router.get('/hall-of-fame', function(req, res, next) {
   var maxes = {"Cache":[-1,""], "Cobblestone":[-1,""], "Dust II":[-1,""], "Inferno":[-1,""], "Mirage":[-1,""], "Nuke":[-1,""], "Overpass":[-1,""], "Train":[-1,""], "Vertigo":[-1,""]};
-  var reverse_double = {"Tim":0 , "Ryan":0, "Collin":0, "Sean":0, "Cal":0, "Sharfin":0, "Josh":0};
+  var reverse_double = {"Tim":0 , "Ryan":0, "Collin":0, "Sean":0, "Jack":0, "Sharfin":0, "Connor":0};
   async.parallel({
       matches: function(callback) {
         Match.find()
@@ -331,7 +331,7 @@ router.get('/hall-of-fame', function(req, res, next) {
 
 router.get('/hall-of-shame', function(req, res, next) {
   var maxes = {"Cache":[50,""], "Cobblestone":[50,""], "Dust II":[50,""], "Inferno":[50,""], "Mirage":[50,""], "Nuke":[50,""], "Overpass":[50,""], "Train":[50,""], "Vertigo":[50,""]};
-  var double_0 = {"Tim":0 , "Ryan":0, "Collin":0, "Sean":0, "Cal":0, "Sharfin":0, "Josh":0};
+  var double_0 = {"Tim":0 , "Ryan":0, "Collin":0, "Sean":0, "Jack":0, "Sharfin":0, "Connor":0};
   async.parallel({
       matches: function(callback) {
         Match.find()

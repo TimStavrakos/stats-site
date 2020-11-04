@@ -2,10 +2,12 @@ extends layout
 
 block content
   .content-wrapper
+  h1 #{user}
   .charts
-    h1 Best Buddies
+    h2 Best Buddies
     p Most Assited By: #{assister}-#{assists_num}
     p Most Assisted: #{assisted}-#{assisted_num}
+    p aces: #{aces}
     p 40 bombs: #{k_40}
     p 30 bombs: #{k_30}
     p sub 10: #{sub_10}
