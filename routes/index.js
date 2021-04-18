@@ -8,6 +8,10 @@ var async = require('async');
 /* GET home page. */
 
 router.get('/', function(req, res, next) {
+  res.render('home');
+});
+
+router.get('/Shared', function(req, res, next) {
   var maps_filter = req.query.map;
   var end_date = req.query.endDate;
   var start_date = req.query.startDate;
@@ -67,7 +71,7 @@ router.get('/', function(req, res, next) {
       var connor_configured = [];
       for (match in matches) {
         var match_id = matches[match]._id;
-        var tim_instance = tim.find(instance => {return instance.match + '' == match_id + '';});
+        var tim_instance = tim.find(instance => { return instance.match + '' == match_id + '';});
         if(typeof(tim_instance) != "undefined") {
           tim_configured.push(tim_instance);
         } else {
@@ -138,7 +142,6 @@ router.get('/', function(req, res, next) {
           }
         }
       }
-
       res.render('shared', { title: 'Shared', matches: matches, list: player_list, averages:averages});
 
   });

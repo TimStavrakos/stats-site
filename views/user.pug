@@ -5,9 +5,9 @@ block content
   h1 #{user}
   .charts
     h2 Best Buddies
-    p Most Assited By: #{assister}-#{assists_num}
-    p Most Assisted: #{assisted}-#{assisted_num}
-    p aces: #{aces}
+    //p Most Assited By: #{assister}-#{assists_num}
+    //p Most Assisted: #{assisted}-#{assisted_num}
+    //p aces: #{aces}
     p 40 bombs: #{k_40}
     p 30 bombs: #{k_30}
     p sub 10: #{sub_10}
@@ -43,7 +43,11 @@ block content
         th Map
         th Score
         th Rating
+        th Rating:T
+        th Rating:CT
         th Adr
+        th Adr:T
+        th Adr:CT
         th KDD
         th KPR
         th KPR:T
@@ -56,8 +60,12 @@ block content
         th Clutches
       tr#averagesHeader
         th(colspan='3') Averages:
-        th= averages.rating.toFixed(2)
+        th= (averages.rating).toFixed(2)
+        th= (averages.rating_t).toFixed(2)
+        th= (averages.rating_ct).toFixed(2)
         th= (averages.adr).toFixed(2)
+        th= (averages.adr_t).toFixed(2)
+        th= (averages.adr_ct).toFixed(2)
         th= (averages.kdd).toFixed(2)
         th= (averages.kpr).toFixed(2)
         th= (averages.kpr_t).toFixed(2)
@@ -76,7 +84,11 @@ block content
           td #{stat.match.map}
           td #{stat.match.score[0]}-#{stat.match.score[1]}
           td= stat.rating.toFixed(2)
-          td= stat.adr
+          td= stat.rating_t.toFixed(2)
+          td= stat.rating_ct.toFixed(2)
+          td= stat.adr.toFixed(2)
+          td= stat.adr_t.toFixed(2)
+          td= stat.adr_ct.toFixed(2)
           td= stat.kdd
           td= stat.kpr.toFixed(2)
           if stat.kpr_t == null
@@ -84,8 +96,8 @@ block content
           else
             td= stat.kpr_t.toFixed(2)
           td= stat.kpr_ct.toFixed(2)
-          td #{stat.trades}
-          td #{stat.hs}
+          td #{stat.trade_kills}
+          td= stat.hs.toFixed(2)
           td #{stat.kills}
           td #{stat.assists}
           td #{stat.deaths}
