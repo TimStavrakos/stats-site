@@ -26,7 +26,7 @@ router.get('/:id', function(req, res) {
       list_stats.sort(function(a,b) {
         return new Date(b.match.date) - new Date(a.match.date);
       })
-      console.log(list_stats)
+      //console.log(list_stats)
       if(maps_filter == undefined){
         maps_filter = ["Cache", "Cobblestone", "Dust II", "Inferno", "Mirage", "Nuke", "Overpass", "Train", "Vertigo"];
       }
@@ -35,7 +35,7 @@ router.get('/:id', function(req, res) {
       }
       for(var i = 0; i < list_stats.length; i++){
         var match = list_stats[i].match;
-        console.log(match)
+        //console.log(match)
         var result = match.score[0] != match.score[1] ? (match.score[0] > match.score[1] ? 'win' : 'loss') : 'draw';
         if(!maps_filter.includes(match.map) || new Date(match.date) > new Date(end_date) || new Date(match.date) < new Date(start_date) || !result_filter.includes(result)){
           list_stats.splice(i, 1);

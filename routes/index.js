@@ -190,7 +190,7 @@ router.get('/rounds', function(req, res, next) {
         averages['Force'][1] += stats[i].loss_buy['Force buy'];
         averages['Normal'][1] += stats[i].loss_buy['Normal'];
       }
-      console.log(stats[1]['loss_buy']);
+      //console.log(stats[1]['loss_buy']);
       res.render('round_wins', {title: 'Rounds', matches: stats, averages: averages});
     })
 });
