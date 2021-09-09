@@ -3,6 +3,7 @@ __pycache__/
 index.html
 leaderboards.html
 populatedb.py
+pistols_runner.py
 shared.html
 stats_runner.py
 test_populatedb.py

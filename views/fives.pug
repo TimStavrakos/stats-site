@@ -1,0 +1,27 @@
+extends layout
+
+block content
+  .filters-wrapper
+    form(action="/Fives" method='GET')
+      select(name="Players" multiple)
+        option(value='' disabled='' selected='') Players
+        option(value='Tim') Tim
+        option(value='Ryan') Ryan
+        option(value='Collin') Collin
+        option(value='Connor') Connor
+        option(value='Jack') Jack
+      input(type="submit" action="Submit")
+  .table-wrapper
+    table#statsTable
+      tr
+        th
+        th(colspan='3')
+        each player in players
+          th.user-header(colspan='3') #{player}
+        each row in formatted_rows
+          tr
+          each cell, index in row
+            if index > 2
+              td= cell.toFixed(2)
+            else
+              td= cell

@@ -24,10 +24,10 @@ block content
       input(type="submit" action="Submit")
   .table-wrapper
       table#statsTable
-        tr
-          th(colspan='3')
-          th(colspan='6') Wins
-          th(colspan='6') Losses
+        //tr
+          //th(colspan='3')
+          //th(colspan='6') Wins
+          //th(colspan='6') Losses
         tr
           th Date
           th Map
@@ -38,42 +38,17 @@ block content
           th Semi-Eco
           th Force Buy
           th Normal
-          th Pistol Round
-          th Eco
-          th Anti-Eco
-          th Semi-Eco
-          th Force Buy
-          th Normal
-        tr#averagesHeader
-          //each average in averages
-          th(colspan='3') Averages:
-          th= (averages['Pistol'][0]/matches.length).toFixed(2)
-          th= (averages['Eco'][0]/matches.length).toFixed(2)
-          th= (averages['Anti-Eco'][0]/matches.length).toFixed(2)
-          th= (averages['Semi-Eco'][0]/matches.length).toFixed(2)
-          th= (averages['Force'][0]/matches.length).toFixed(2)
-          th= (averages['Normal'][0]/matches.length).toFixed(2)
-          th= (averages['Pistol'][1]/matches.length).toFixed(2)
-          th= (averages['Eco'][1]/matches.length).toFixed(2)
-          th= (averages['Anti-Eco'][1]/matches.length).toFixed(2)
-          th= (averages['Semi-Eco'][1]/matches.length).toFixed(2)
-          th= (averages['Force'][1]/matches.length).toFixed(2)
-          th= (averages['Normal'][1]/matches.length).toFixed(2)
         each match, index in matches
-          - var result = match.score[0] != match.score[1] ? (match.score[0] > match.score[1] ? 'win' : 'loss') : 'draw'
+          - var result = match.results;
+          - var rounds = {'Pistol': 0, 'Eco': 0, 'Full': 0,  'Half': 0, 'Force': 0, 'Anti-eco': 0};
+          - for(round in match.buys){rounds[match.buys[round]] += 1;}
           tr(class=result+'_row')
-            td #{match.formatted_date}
-            td #{match.map}
+            td= match.formatted_date
+            td= match.map
             td #{match.score[0]}-#{match.score[1]}
-            td= match.wins_buy['Pistol round']
-            td= match.wins_buy.Eco
-            td #{match.wins_buy['Anti-Eco']}
-            td #{match.wins_buy['Semi-Eco']}
-            td #{match.wins_buy['Force buy']}
-            td #{match.wins_buy['Normal']}
-            td #{match.loss_buy['Pistol round']}
-            td #{match.loss_buy['Eco']}
-            td #{match.loss_buy['Anti-Eco']}
-            td #{match.loss_buy['Semi-Eco']}
-            td #{match.loss_buy['Force buy']}
-            td #{match.loss_buy['Normal']}
+            td= rounds['Pistol']
+            td= rounds['Eco']
+            td= rounds['Anti-eco']
+            td= rounds['Half']
+            td= rounds['Force']
+            td= rounds['Full']

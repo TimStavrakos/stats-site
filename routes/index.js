@@ -11,122 +11,124 @@ router.get('/', function(req, res, next) {
   res.render('home');
 });
 
+router.get('/Match/:id', function(req, res, next){
+  var id = req.params.id;
+  Match.find({'match_id': id})
+    .exec(function (err, list_stats){
+      res.render('match', {});
+    })
+});
+
+router.get('/Fives', function(req, res, next){
+  var players = req.query.array.split(',');
+  console.log(players);
+  Match.find({'players': {$all: players}})
+    .sort([['date', 'descending']])
+    .populate('stats_instances')
+    .exec(function (err, list_stats){
+      var formatted_rows = [];
+      for (match in list_stats){
+        console.log('\nLineBreak\n');
+        //console.log(list_stats[match]);
+        var temp_row = [list_stats[match].formatted_date, list_stats[match].map, list_stats[match].score];
+        for (player in players){
+          for (player_stats in list_stats[match].stats_instances) {
+            var instance = list_stats[match].stats_instances[player_stats];
+            //console.log(instance.user);
+            if (instance.user == players[player]) {
+              temp_row.push(instance.rating);
+              temp_row.push(instance.adr);
+              temp_row.push(instance.kda);
+            }
+            console.log(temp_row);
+          }
+        }
+        formatted_rows.push(temp_row);
+        console.log(formatted_rows);
+      }
+      res.render('fives', {players: players, formatted_rows: formatted_rows});
+    })
+});
+
 router.get('/Shared', function(req, res, next) {
   var maps_filter = req.query.map;
   var end_date = req.query.endDate;
   var start_date = req.query.startDate;
   var result_filter = req.query.result;
-  async.parallel({
-    matches: function(callback) {
-      Match.find()
-      .exec(callback)
-    },
-    tim: function(callback) {
-      StatsInstance.find({ 'user': 'Tim'})
-      .sort([['match', 'ascending']])
-      .exec(callback)
-    },
-    ryan: function(callback) {
-      StatsInstance.find({ 'user': 'Ryan'})
-      .sort([['match', 'ascending']])
-      .exec(callback)
-    },
-    collin: function(callback) {
-      StatsInstance.find({ 'user': 'Collin'})
-      .sort([['match', 'ascending']])
-      .exec(callback)
-    },
-    jack: function(callback) {
-      StatsInstance.find({ 'user': 'Jack'})
-      .sort([['match', 'ascending']])
-      .exec(callback)
-    },
-    sean: function(callback) {
-      StatsInstance.find({ 'user': 'Sean'})
-      .sort([['match', 'ascending']])
-      .exec(callback)
-    },
-    connor: function(callback) {
-      StatsInstance.find({ 'user': 'Connor'})
-      .sort([['match', 'ascending']])
-      .exec(callback)
-    },
-  }, function (err, results) {
+  if(maps_filter == undefined){
+    maps_filter = ["Cache", "Cobblestone", "Dust II", "Inferno", "Mirage", "Nuke", "Overpass", "Train", "Vertigo"];
+  }
+  if(result_filter == undefined){
+    result_filter = ['win', 'loss', 'draw'];
+  }
+  if(start_date == undefined) {
+    start_date = new Date(2016, 8, 7);
+  }
+  if(end_date == undefined) {
+    end_date = new Date();
+  }
+  console.log(start_date)
+  console.log(end_date)
+  Match.find({'map': {$in: maps_filter}, 'result': {$in: result_filter},
+              'date': {$gte: start_date, $lte: end_date}})
+    .sort([['date', 'descending']])
+    .populate('stats_instances')
+    .exec(function (err, results) {
       if (err) {return next(err);}
-      var matches = results.matches;
-      var tim = results.tim.sort(function(a,b){return b.match-a.match;});
-      var ryan = results.ryan.sort(function(a,b){return b.match-a.match;});
-      var collin = results.collin.sort(function(a,b){return b.match-a.match;});
-      var jack = results.jack.sort(function(a,b){return b.match-a.match;});
-      var sean = results.sean.sort(function(a,b){return b.match-a.match;});
-      var connor = results.connor.sort(function(a,b){return b.match-a.match;});
-      matches.sort(function(a,b) {
-        return new Date(b.date) - new Date(a.date);
-      });
       var tim_configured = [];
       var ryan_configured = [];
       var collin_configured = [];
       var jack_configured = [];
       var sean_configured = [];
       var connor_configured = [];
+      var wins = 0;
+      var losses = 0;
+      var ties = 0;
+      var matches = results;
       for (match in matches) {
         var match_id = matches[match]._id;
-        var tim_instance = tim.find(instance => { return instance.match + '' == match_id + '';});
-        if(typeof(tim_instance) != "undefined") {
-          tim_configured.push(tim_instance);
+        if (matches[match].score[0] > matches[match].score[1]) {
+          wins += 1;
+        } else if (matches[match].score[0] < matches[match].score[1]) {
+          losses += 1;
+        } else {
+          ties += 1;
+        }
+
+        if(matches[match].players.includes("Tim")) {
+          tim_configured.push(matches[match].stats_instances[matches[match].players.indexOf("Tim")]);
         } else {
           tim_configured.push('');
         }
-        var ryan_instance = ryan.find(instance => {return instance.match + '' == match_id + '';});
-        if(typeof(ryan_instance) != "undefined") {
-          ryan_configured.push(ryan_instance);
+
+        if(matches[match].players.includes("Ryan")) {
+          ryan_configured.push(matches[match].stats_instances[matches[match].players.indexOf("Ryan")]);
         } else {
           ryan_configured.push('');
         }
-        var collin_instance = collin.find(instance => {return instance.match + '' == match_id + '';});
-        if(typeof(collin_instance) != "undefined") {
-          collin_configured.push(collin_instance);
+
+        if(matches[match].players.includes("Collin")) {
+          collin_configured.push(matches[match].stats_instances[matches[match].players.indexOf("Collin")]);
         } else {
           collin_configured.push('');
         }
-        var jack_instance = jack.find(instance => {return instance.match + '' == match_id + '';});
-        if(typeof(jack_instance) != "undefined") {
-          jack_configured.push(jack_instance);
+
+        if(matches[match].players.includes("Jack")) {
+          jack_configured.push(matches[match].stats_instances[matches[match].players.indexOf("Jack")]);
         } else {
           jack_configured.push('');
         }
-        var sean_instance = sean.find(instance => {return instance.match + '' == match_id + '';});
-        if(typeof(sean_instance) != "undefined") {
-          sean_configured.push(sean_instance);
+
+        if(matches[match].players.includes("Sean")) {
+          sean_configured.push(matches[match].stats_instances[matches[match].players.indexOf("Sean")]);
         } else {
           sean_configured.push('');
         }
-        var connor_instance = connor.find(instance => {return instance.match + '' == match_id + '';});
-        if(typeof(connor_instance) != "undefined") {
-          connor_configured.push(connor_instance);
+
+        if(matches[match].players.includes("Connor")) {
+          connor_configured.push(matches[match].stats_instances[matches[match].players.indexOf("Connor")]);
         } else {
           connor_configured.push('');
-        }
-      }
-
-      if(maps_filter == undefined){
-        maps_filter = ["Cache", "Cobblestone", "Dust II", "Inferno", "Mirage", "Nuke", "Overpass", "Train", "Vertigo"];
-      }
-      if(result_filter == undefined){
-        result_filter = ['win', 'loss', 'draw'];
-      }
-      for(var i = 0; i < matches.length; i++){
-        var match = matches[i];
-        var result = match.score[0] != match.score[1] ? (match.score[0] > match.score[1] ? 'win' : 'loss') : 'draw';
-        if(!maps_filter.includes(match.map) || new Date(match.date) > new Date(end_date) || new Date(match.date) < new Date(start_date) || !result_filter.includes(result)){
-          matches.splice(i, 1);
-          tim_configured.splice(i,1);
-          ryan_configured.splice(i,1);
-          collin_configured.splice(i,1);
-          sean_configured.splice(i,1);
-          jack_configured.splice(i,1);
-          connor_configured.splice(i,1);
-          i--;
         }
       }
 
@@ -142,7 +144,7 @@ router.get('/Shared', function(req, res, next) {
           }
         }
       }
-      res.render('shared', { title: 'Shared', matches: matches, list: player_list, averages:averages});
+      res.render('shared', { title: 'Shared', matches: matches, list: player_list, averages:averages, wins:wins, losses:losses, ties:ties});
 
   });
 });
@@ -153,12 +155,9 @@ router.get('/rounds', function(req, res, next) {
   var start_date = req.query.startDate;
   var result_filter = req.query.result;
   Match.find()
-    .sort([['date', 'ascending']])
+    .sort([['date', 'descending']])
     .exec(function(err, stats) {
       if (err) {return next(err);}
-      stats.sort(function(a,b) {
-        return new Date(b.date) - new Date(a.date);
-      })
 
       if(maps_filter == undefined){
         maps_filter = ["Cache", "Cobblestone", "Dust II", "Inferno", "Mirage", "Nuke", "Overpass", "Train", "Vertigo"];
@@ -168,14 +167,26 @@ router.get('/rounds', function(req, res, next) {
       }
       for(var i = 0; i < stats.length; i++){
         var match = stats[i];
-        var result = match.score[0] != match.score[1] ? (match.score[0] > match.score[1] ? 'win' : 'loss') : 'draw';
+        var result = match.result;
         if(!maps_filter.includes(match.map) || new Date(match.date) > new Date(end_date) || new Date(match.date) < new Date(start_date) || !result_filter.includes(result)){
           stats.splice(i, 1);
           i--;
         }
       }
 
-      var averages = {'Pistol': [0,0], 'Eco': [0,0], 'Anti-Eco': [0,0], 'Semi-Eco': [0,0], 'Force': [0,0], 'Normal': [0,0]};
+      var buys = {};
+
+      for(match in stats){
+        for(buy in stats[match].buys){
+          if(!(stats[match].buys[buy] in buys)){
+            buys[stats[match].buys[buy]] = 1;
+          } else {
+            buys[stats[match].buys[buy]] += 1;
+          }
+        }
+      }
+
+      /*var averages = {'Pistol': [0,0], 'Eco': [0,0], 'Anti-Eco': [0,0], 'Semi-Eco': [0,0], 'Force': [0,0], 'Normal': [0,0]};
       for(var i = 0; i < stats.length; i++) {
         averages['Pistol'][0] += stats[i]['wins_buy']['Pistol round'];
         averages['Eco'][0] += stats[i].wins_buy['Eco'];
@@ -189,68 +200,57 @@ router.get('/rounds', function(req, res, next) {
         averages['Semi-Eco'][1] += stats[i].loss_buy['Semi-Eco'];
         averages['Force'][1] += stats[i].loss_buy['Force buy'];
         averages['Normal'][1] += stats[i].loss_buy['Normal'];
-      }
-      //console.log(stats[1]['loss_buy']);
-      res.render('round_wins', {title: 'Rounds', matches: stats, averages: averages});
+      }*/
+      console.log(stats);
+      res.render('round_wins', {title: 'Rounds', matches: stats, averages: buys});
     })
 });
 
 router.get('/leaderboards', function(req, res, next) {
   var date = req.query.month;
-  async.parallel({
-    matches: function(callback) {
-      Match.find()
-      .exec(callback)
-    },
-    tim: function(callback) {
-      StatsInstance.find({ 'user': 'Tim'})
-      .populate('match')
-      .sort([['match', 'ascending']])
-      .exec(callback)
-    },
-    ryan: function(callback) {
-      StatsInstance.find({ 'user': 'Ryan'})
-      .populate('match')
-      .sort([['match', 'ascending']])
-      .exec(callback)
-    },
-    collin: function(callback) {
-      StatsInstance.find({ 'user': 'Collin'})
-      .populate('match')
-      .sort([['match', 'ascending']])
-      .exec(callback)
-    },
-    jack: function(callback) {
-      StatsInstance.find({ 'user': 'Jack'})
-      .populate('match')
-      .sort([['match', 'ascending']])
-      .exec(callback)
-    },
-    sean: function(callback) {
-      StatsInstance.find({ 'user': 'Sean'})
-      .populate('match')
-      .sort([['match', 'ascending']])
-      .exec(callback)
-    },
-    connor: function(callback) {
-      StatsInstance.find({ 'user': 'Connor'})
-      .populate('match')
-      .sort([['match', 'ascending']])
-      .exec(callback)
-    }
-  }, function (err, results) {
+  if(date == undefined){
+    date_filter = new Date();
+  } else {
+    date_filter = new Date(date);
+  }
+  previous_date = new Date(date_filter.getTime());
+  previous_date.setMonth(date_filter.getMonth() + 1);
+  Match.find({'players': {$in: ['Tim', 'Ryan', 'Collin', 'Sean', 'Jack', 'Connor']},
+              'date': {$gte: date_filter, $lt: previous_date}})
+    .populate('stats_instances')
+    .exec(function (err, results) {
     if (err) {return next(err);}
-    var date_filter = new Date(date);
-    if(date_filter == undefined){
-      date_filter = new Date();
+
+    var averages = {'Tim': {'rating': 0, 'kdr': 0, 'kda': 0, 'hs': 0, 'adr': 0, 'kpr': 0, 'count': 0},
+                    'Ryan': {'rating': 0, 'kdr': 0, 'kda': 0, 'hs': 0, 'adr': 0, 'kpr': 0, 'count': 0},
+                    'Collin': {'rating': 0, 'kdr': 0, 'kda': 0, 'hs': 0, 'adr': 0, 'kpr': 0, 'count': 0},
+                    'Sean': {'rating': 0, 'kdr': 0, 'kda': 0, 'hs': 0, 'adr': 0, 'kpr': 0, 'count': 0},
+                    'Jack': {'rating': 0, 'kdr': 0, 'kda': 0, 'hs': 0, 'adr': 0, 'kpr': 0, 'count': 0},
+                    'Connor': {'rating': 0, 'kdr': 0, 'kda': 0, 'hs': 0, 'adr': 0, 'kpr': 0, 'count': 0}};
+
+    for(match in results) {
+      var current_match = results[match]
+      for(player in results[match].players){
+        if(['Tim','Ryan','Collin','Sean','Jack','Connor'].includes(current_match.players[player])){
+          averages[current_match.players[player]].rating += current_match.stats_instances[player].rating;
+          averages[current_match.players[player]].kdr += current_match.stats_instances[player].kdr;
+          averages[current_match.players[player]].kda += current_match.stats_instances[player].kda;
+          averages[current_match.players[player]].hs += current_match.stats_instances[player].hs;
+          averages[current_match.players[player]].adr += current_match.stats_instances[player].adr;
+          averages[current_match.players[player]].kpr += current_match.stats_instances[player].kpr;
+          averages[current_match.players[player]].count += 1;
+        }
+      }
     }
-    var averages = {};
-    averages['Tim'] = leaderboardsHelperFunction(results.tim, date_filter);
-    averages['Ryan'] = leaderboardsHelperFunction(results.ryan, date_filter);
-    averages['Collin'] = leaderboardsHelperFunction(results.collin, date_filter);
-    averages['Sean'] = leaderboardsHelperFunction(results.sean, date_filter);
-    averages['Jack'] = leaderboardsHelperFunction(results.jack, date_filter);
-    averages['Connor'] = leaderboardsHelperFunction(results.connor, date_filter);
+
+    for(player in averages) {
+      for(stat in averages[player]) {
+        if(stat != 'count') {
+          averages[player][stat] = averages[player][stat] / averages[player]['count'];
+        }
+      }
+    }
+
     var ratings = [];
     var kdr  = [];
     var kda = [];
@@ -259,16 +259,17 @@ router.get('/leaderboards', function(req, res, next) {
     var kpr = [];
     var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
     var month_years = [];
-    var matches = results.matches;
-    matches.sort(function(a,b) {
+    //var matches = results.matches;
+    /*matches.sort(function(a,b) {
       return new Date(b.date) - new Date(a.date);
-    });
-    for (match in matches) {
-      match_date = new Date(matches[match].date);
-      date_string = months[match_date.getMonth()] + " " + match_date.getFullYear();
+    });*/
+    var month_date = new Date();
+    while (month_date.getFullYear() != "2016" || month_date.getMonth() != 8) {
+      date_string = months[month_date.getMonth()] + " " + month_date.getFullYear();
       if(!month_years.includes(date_string)){
         month_years.push(date_string);
       }
+      month_date.setMonth(month_date.getMonth()-1);
     }
     for (player in averages) {
       ratings.push({'player': player, 'stat': averages[player].rating});
@@ -292,40 +293,34 @@ router.get('/leaderboards', function(req, res, next) {
 router.get('/hall-of-fame', function(req, res, next) {
   var maxes = {"Cache":[-1,""], "Cobblestone":[-1,""], "Dust II":[-1,""], "Inferno":[-1,""], "Mirage":[-1,""], "Nuke":[-1,""], "Overpass":[-1,""], "Train":[-1,""], "Vertigo":[-1,""]};
   var reverse_double = {"Tim":0 , "Ryan":0, "Collin":0, "Sean":0, "Jack":0, "Sharfin":0, "Connor":0};
-  async.parallel({
-      matches: function(callback) {
-        Match.find()
-        .exec(callback)
-      },
-      players: function(callback) {
-        StatsInstance.find()
-        .populate('match')
-        .exec(callback)
-      }
-    }, function(err, results) {
+  Match.find()
+    .populate('stats_instances')
+    .exec(function(err, results) {
       if (err) {return next(err);}
-      var player_list = [];
-      player_list = results.players;
-      for(var i = 0; i < player_list.length; i++){
-        var current_map = player_list[i].match.map;
-        var current_kills = player_list[i].kills;
-        if(maxes[current_map][0] < current_kills){
-          maxes[current_map][0] = current_kills;
-          maxes[current_map][1] = player_list[i].user;
-        } else if (maxes[current_map][0] == current_kills) {
-          maxes[current_map][1] += ", " + player_list[i].user;
+      for(var i = 0; i < results.length; i++){
+        var current_map = results[i].map;
+        for(var j = 0; j < results[i].stats_instances.length; j++){
+          var current_kills = results[i].stats_instances[j].kills;
+          if(maxes[current_map][0] < current_kills){
+            maxes[current_map][0] = current_kills;
+            maxes[current_map][1] = results[i].stats_instances[j].user;
+          } else if (maxes[current_map][0] == current_kills) {
+            maxes[current_map][1] += ", " + results[i].stats_instances[j].user;
+          }
         }
       }
       max_double = -1;
       max_double_player = "";
-      for(var i = 0; i < player_list.length; i++) {
-        instance = player_list[i];
-        if(instance.reverse_double) {
-          reverse_double[instance.user] += 1
-        }
-        if(reverse_double[instance.user] > max_double) {
-          max_double = reverse_double[instance.user];
-          max_double_player = instance.user;
+      for(var i = 0; i < results.length; i++) {
+        for(var j = 0; j < results[i].stats_instances.length; j++){
+          instance = results[i].stats_instances[j];
+          if(instance.reverse_double) {
+            reverse_double[instance.user] += 1
+          }
+          if(reverse_double[instance.user] > max_double) {
+            max_double = reverse_double[instance.user];
+            max_double_player = instance.user;
+          }
         }
       }
       res.render('hall-of-fame', {title: 'Hall Of Fame', max: maxes, "reverse_player":max_double_player, "reverse_double": max_double});
@@ -335,65 +330,39 @@ router.get('/hall-of-fame', function(req, res, next) {
 router.get('/hall-of-shame', function(req, res, next) {
   var maxes = {"Cache":[50,""], "Cobblestone":[50,""], "Dust II":[50,""], "Inferno":[50,""], "Mirage":[50,""], "Nuke":[50,""], "Overpass":[50,""], "Train":[50,""], "Vertigo":[50,""]};
   var double_0 = {"Tim":0 , "Ryan":0, "Collin":0, "Sean":0, "Jack":0, "Sharfin":0, "Connor":0};
-  async.parallel({
-      matches: function(callback) {
-        Match.find()
-        .exec(callback)
-      },
-      players: function(callback) {
-        StatsInstance.find()
-        .populate('match')
-        .exec(callback)
-      }
-    }, function(err, results) {
+    Match.find()
+    .populate('stats_instances')
+    .exec(function(err, results) {
       if (err) {return next(err);}
-      var player_list = [];
-      player_list = results.players;
-      for(var i = 0; i < player_list.length; i++){
-        var current_map = player_list[i].match.map;
-        var current_kills = player_list[i].kills;
-        if(maxes[current_map][0] > current_kills){
-          maxes[current_map][0] = current_kills;
-          maxes[current_map][1] = player_list[i].user;
-        } else if (maxes[current_map][0] == current_kills) {
-          maxes[current_map][1] += ", " + player_list[i].user;
+      for(var i = 0; i < results.length; i++){
+        for(var j = 0; j < results[i].stats_instances.length; j++){
+          var current_map = results[i].map;
+          var current_kills = results[i].stats_instances[j].kills;
+          if(maxes[current_map][0] > current_kills){
+            maxes[current_map][0] = current_kills;
+            maxes[current_map][1] = results[i].stats_instances[j].user;
+          } else if (maxes[current_map][0] == current_kills) {
+            maxes[current_map][1] += ", " + results[i].stats_instances[j].user;
+          }
         }
       }
       max_double = -1;
       max_double_player = "";
-      for(var i = 0; i < player_list.length; i++) {
-        instance = player_list[i];
-        if(instance.double_0){
-          double_0[instance.user] += 1;
-        }
-        if(double_0[instance.user] > max_double){
-          max_double = double_0[instance.user];
-          max_double_player = instance.user;
+      for(var i = 0; i < results.length; i++) {
+        for(var j = 0; j < results[i].stats_instances.length; j++){
+          instance = results[i].stats_instances[j];
+          if(instance.double_0){
+            double_0[instance.user] += 1;
+          }
+          if(double_0[instance.user] > max_double){
+            max_double = double_0[instance.user];
+            max_double_player = instance.user;
+          }
         }
       }
       res.render('hall-of-shame', {title: 'Hall Of Fame', max: maxes, "double_0": max_double, "double_player": max_double_player});
   });
 });
-
-function leaderboardsHelperFunction(statsObject, date) {
-  var averages = {'rating':0, 'kdr':0, 'kda':0, 'hs':0, 'adr':0, 'kpr':0, 'count':0};
-  for(var i = 0; i < statsObject.length; i++){
-    var matchDate = new Date(statsObject[i].match.date);
-    if((matchDate.getMonth() == date.getMonth()) && (matchDate.getFullYear() == date.getFullYear())) {
-      averages.rating += statsObject[i].rating;
-      averages.kdr += statsObject[i].kdr;
-      averages.kda += statsObject[i].kda;
-      averages.hs += statsObject[i].hs;
-      averages.adr += statsObject[i].adr;
-      averages.kpr += statsObject[i].kpr;
-      averages.count += 1;
-    }
-  }
-  for (stat in averages) {
-    averages[stat] /= averages.count;
-  }
-  return averages;
-}
 
 function compare_stats(a,b) {
   if(isNaN(a.stat)) {

@@ -3,8 +3,11 @@ extends layout
 block content
   .content-wrapper
   .charts
+    canvas#myChart
+  .charts2
+    canvas#myChart2
   .table-wrapper
-    iframe(src="https://clips.twitch.tv/embed?clip=AgileAmusedHamsterOpieOP", frameborder="0", allowfullscreen="true", height="378", width="620")
+    //iframe(src="https://clips.twitch.tv/embed?clip=AgileAmusedHamsterOpieOP", frameborder="0", allowfullscreen="true", height="378", width="620")
     //table#mapsTable
       //tr
         //th
@@ -33,7 +36,7 @@ block content
   .filters-wrapper
     form(action="/shared" method='GET')
       select(name="map" multiple)
-        option(value='' disabled='' selected='') Map Filter
+        option(value='' disabled='') Map Filter
         option(value='Cache') Cache
         option(value='Cobblestone') Cobblestone
         option(value='Dust II') Dust II
@@ -89,7 +92,7 @@ block content
           th= (player.adr/player.count).toFixed(0)
           th= (player.kda/player.count).toFixed(2)
       each match, index in matches
-        - var result = match.score[0] != match.score[1] ? (match.score[0] > match.score[1] ? 'win' : 'loss') : 'draw'
+        - var result = match.results
         tr(class=result+'_row')
           td #{match.formatted_date}
           td #{match.map}
@@ -106,7 +109,6 @@ block content
 
   script.
     window.onload = function() {todaysDate();}
-    //window.onready = function() {getMaps();}
 
     function todaysDate() {
       var today = new Date();
@@ -114,130 +116,66 @@ block content
       input.value = today.getFullYear() + "-" + ("0" + (today.getMonth() + 1)).slice(-2) + "-" + ("0" + today.getDate()).slice(-2);
     }
 
-    function updateAverages(averages) {
-      var header = document.getElementById("averagesHeader");
-      var th = header.getElementsByTagName("th");
-      for (var i = 0; i <averages.length; i++) {
-        th[(3*i)+1].innerHTML = (averages[i].rating / averages[i].count).toFixed(2);
-        th[(3*i)+2].innerHTML = (averages[i].adr / averages[i].count).toFixed(2);
-        th[(3*i)+3].innerHTML = (averages[i].kda / averages[i].count).toFixed(2);
-      }
-    }
-
-    function filter() {
-      var table = document.getElementById("statsTable");
-      var tr = table.getElementsByTagName("tr");
-      var resultsInput = document.getElementById("resultsFilter");
-      var mapInput = document.getElementById("mapFilter");
-      var startDateInput = document.getElementById("startDate");
-      var endDateInput = document.getElementById("endDate");
-      var resultsFilter = resultsInput.options[resultsInput.selectedIndex].value;
-      var mapsFilter = mapInput.options[mapInput.selectedIndex].value;
-      var startDateFilter = new Date(startDateInput.value);
-      var endDateFilter = new Date(endDateInput.value);
-      resultsFilter = resultsFilter.toLowerCase();
-      mapsFilter = mapsFilter.toUpperCase();
-      var averages = [{
-          'rating':0,
-          'adr':0,
-          'kda':0,
-          'count':0
-        },
-        {
-          'rating':0,
-          'adr':0,
-          'kda':0,
-          'count':0
-        },
-        {
-          'rating':0,
-          'adr':0,
-          'kda':0,
-          'count':0
-        },
-        {
-          'rating':0,
-          'adr':0,
-          'kda':0,
-          'count':0
-        },
-        {
-          'rating':0,
-          'adr':0,
-          'kda':0,
-          'count':0
-        },
-        {
-          'rating':0,
-          'adr':0,
-          'kda':0,
-          'count':0
-        },
-      ];
-
-      for(i = 3; i < tr.length; i++) {
-        if (tr[i].classList.contains(resultsFilter+"_row") || resultsFilter == '') {
-          td = tr[i].getElementsByTagName("td");
-          if (td[1]) {
-            if(new Date(td[0].innerHTML) > startDateFilter && new Date(td[0].innerHTML) < endDateFilter) {
-              if (td[1].innerHTML.toUpperCase().indexOf(mapsFilter) > -1 || mapsFilter == '') {
-                tr[i].style.display = "";
-                for(var j = 3; j < td.length; j+=3){
-                  if(!td[j].innerHTML == "") {
-                    averages[(j/3)-1].rating += parseFloat(td[j].innerHTML);
-                    averages[(j/3)-1].adr += parseFloat(td[j+1].innerHTML);
-                    averages[(j/3)-1].kda += parseFloat(td[j+2].innerHTML);
-                    averages[(j/3)-1].count += 1;
-                  }
-                }
-                /*count++;
-                averages['rating'] += parseFloat(td[3].innerHTML);
-                averages['adr'] += parseFloat(td[4].innerHTML);
-                averages['kdd'] += parseFloat(td[5].innerHTML);
-                averages['kpr'] += parseFloat(td[6].innerHTML);*/
-                if(td[7].innerHTML == '') {
-                  //averages['kpr_t'] += 0;
-                } else {
-                  //averages['kpr_t'] += parseFloat(td[8].innerHTML);
-                }
-                if(td[8].innerHTML == '') {
-                  //averages['kpr_ct'] += 0;
-                } else {
-                  //averages['kpr_ct'] += parseFloat(td[8].innerHTML);
-                }
-                /*averages['trades'] += parseFloat(td[9].innerHTML);
-                averages['hs'] += parseFloat(td[10].innerHTML);
-                averages['kills'] += parseFloat(td[11].innerHTML);
-                averages['assists'] += parseFloat(td[12].innerHTML);
-                averages['deaths'] += parseFloat(td[13].innerHTML);
-                averages['clutches'] += parseFloat(td[14].innerHTML);*/
-              } else {
-                tr[i].style.display = "none";
-              }
-            } else {
-                tr[i].style.display = "none";
-            }
-          }
-        } else {
-          tr[i].style.display = "none";
-        }
-      }
-
-      /*averages['rating'] /= count;
-      averages['adr'] /= count;
-      averages['kdd'] /= count;
-      averages['kpr'] /= count;
-      averages['kpr_t'] /= count;
-      averages['kpr_ct'] /= count;
-      averages['trades'] /= count;
-      averages['hs'] /= count;
-      averages['kills'] /= count;
-      averages['assists'] /= count;
-      averages['deaths'] /= count;
-      averages['clutches'] /= count;*/
-      updateAverages(averages);
-    }
-
     function format(date) {
       return (date.getMonth() + 1) + "/" + date.getDate() + "/" + date.getFullYear();
     }
+
+  script.
+    var matches = !{JSON.stringify(matches)}
+    var wins = !{JSON.stringify(wins)}
+    var losses = !{JSON.stringify(losses)}
+    var ties = !{JSON.stringify(ties)}
+    var ctx = document.getElementById('myChart').getContext('2d');
+    var myChart = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: ['Wins', 'Losses', 'Ties'],
+        datasets: [{
+          //label: '# of Votes',
+          data: [wins, losses, ties],
+          backgroundColor: ['rgb(54,162,235)', 'rgb(255,99,132)', 'rgb(255,205,86)']
+        }]
+      },
+    });
+
+  script.
+    var matches = !{JSON.stringify(matches)}
+    var ctx2 = document.getElementById('myChart2').getContext('2d');
+    var dates = [];
+    var players = {"Tim":[], "Ryan":[], "Collin":[], "Sean":[], "Jack":[], "Connor":[]};
+    for(var i = matches.length-1; i >= 0; i--){
+      var date = new Date(matches[i].date);
+      dates.push((date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear());
+      for(player in players){
+        if(!(matches[i].players.includes(player))){
+          players[player].push(null);
+        }
+        for(match_player in matches[i].players){
+          if(player == matches[i].players[match_player]){
+            players[matches[i].players[match_player]].push(matches[i].stats_instances[match_player].rating);
+          }
+        }
+      }
+    }
+
+    var myChart2 = new Chart(ctx2, {
+      "type": "line",
+      "data": {
+        "labels": dates,
+        "datasets":[
+          {"label": "Tim", "data": players["Tim"],"fill":false,"borderColor":"rgb(75,192,192)", "spanGaps": true},
+          {"label": "Ryan", "data": players["Ryan"],"fill":false, "borderColor": "rgb(252, 186, 3)", "spanGaps": true},
+          {"label": "Collin", "data": players["Collin"],"fill":false, "borderColor": "rgb(252, 3, 20)", "spanGaps": true},
+          {"label": "Sean", "data": players["Sean"],"fill":false, "borderColor": "rgb(11, 3, 252)", "spanGaps": true},
+          {"label": "Jack", "data": players["Jack"],"fill":false, "borderColor": "rgb(252, 3, 186)", "spanGaps": true},
+          {"label": "Connor", "data": players["Connor"],"fill":false, "borderColor": "rgb(49, 252, 3)", "spanGaps": true}
+        ],
+      },
+      "options":{
+        elements: {
+          line: {
+              tension: 0
+          }
+        }
+      }
+    });
