@@ -7,32 +7,6 @@ block content
   .charts2
     canvas#myChart2
   .table-wrapper
-    //iframe(src="https://clips.twitch.tv/embed?clip=AgileAmusedHamsterOpieOP", frameborder="0", allowfullscreen="true", height="378", width="620")
-    //table#mapsTable
-      //tr
-        //th
-        //th Tim
-        //th Ryan
-        //th Collin
-        //th Sean
-        //th Cal
-        //th Josh
-      //tr
-        //td Cache
-      //tr
-        //td Mirage
-      //tr
-        //td Dust II
-      //tr
-        //td Inferno
-      //tr
-        //td Overpass
-      //tr
-        //td Nuke
-      //tr
-        //td Cobblestone
-      //tr
-        //td Train
   .filters-wrapper
     form(action="/shared" method='GET')
       select(name="map" multiple)
@@ -50,7 +24,7 @@ block content
         option(value='win') Win
         option(value='loss') Loss
         option(value='draw') Draw
-      input#startDate.Filter(type="date" name="startDate" value="2016-10-07")
+      input#startDate.Filter(type="date" name="startDate" value="#{start_date}")
       input#endDate.Filter(type="date" name="endDate")
       input(type="submit" action="Submit")
   .table-wrapper
@@ -91,6 +65,12 @@ block content
           th= (player.rating/player.count).toFixed(2)
           th= (player.adr/player.count).toFixed(0)
           th= (player.kda/player.count).toFixed(2)
+      tr#variancesHeader
+        th(colspan='3') Deviation:
+        each player in variances
+          th= (player.rating).toFixed(2)
+          th= (player.adr).toFixed(0)
+          th= (player.kda).toFixed(2)
       each match, index in matches
         - var result = match.results
         tr(class=result+'_row')

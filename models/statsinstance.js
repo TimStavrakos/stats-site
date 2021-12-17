@@ -10,6 +10,7 @@ var StatsInstanceSchema = new Schema(
     rating_t: {type: Number, required: true},
     rating_ct: {type: Number, required: true},
     trade_kills: {type: Number, required: true},
+    trade_deaths: {type: Number, required: true},
     adr: {type: Number, required: true},
     adr_t: {type: Number, required: true},
     adr_ct: {type: Number, required: true},
@@ -52,6 +53,9 @@ StatsInstanceSchema
 StatsInstanceSchema
 .virtual('kdr')
 .get(function () {
+  if(this.deaths == 0) {
+    return (this.kills);
+  }
   return (this.kills/this.deaths);
 });
 

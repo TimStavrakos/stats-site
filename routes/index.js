@@ -62,13 +62,12 @@ router.get('/Shared', function(req, res, next) {
     result_filter = ['win', 'loss', 'draw'];
   }
   if(start_date == undefined) {
-    start_date = new Date(2016, 8, 7);
+    start_date = new Date();
+    start_date = start_date.setFullYear(start_date.getFullYear()-1);
   }
   if(end_date == undefined) {
     end_date = new Date();
   }
-  console.log(start_date)
-  console.log(end_date)
   Match.find({'map': {$in: maps_filter}, 'result': {$in: result_filter},
               'date': {$gte: start_date, $lte: end_date}})
     .sort([['date', 'descending']])
@@ -144,7 +143,24 @@ router.get('/Shared', function(req, res, next) {
           }
         }
       }
-      res.render('shared', { title: 'Shared', matches: matches, list: player_list, averages:averages, wins:wins, losses:losses, ties:ties});
+      var variances = [{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0},{'rating': 0, 'adr':0, 'kda':0, 'count':0}];
+      for(var i = 0; i < player_list.length; i++) {
+        for(match in player_list[i]) {
+          if(player_list[i][match] != '') {
+            variances[i].rating += (player_list[i][match].rating - (averages[i].rating/averages[i].count)) ** 2;
+            variances[i].adr += (player_list[i][match].adr - (averages[i].adr/averages[i].count)) ** 2;
+            variances[i].kda += (player_list[i][match].kda - (averages[i].kda/averages[i].count)) ** 2;
+            variances[i].count += 1;
+          }
+        }
+      }
+      for(var i = 0; i < player_list.length; i++) {
+        variances[i].rating = Math.sqrt(variances[i].rating/(variances[i].count-1));
+        variances[i].adr = Math.sqrt(variances[i].adr/(variances[i].count-1));
+        variances[i].kda = Math.sqrt(variances[i].kda/(variances[i].count-1));
+      }
+      console.log(variances);
+      res.render('shared', { title: 'Shared', matches: matches, list: player_list, averages:averages, variances: variances, wins:wins, losses:losses, ties:ties, start_date: start_date});
 
   });
 });
@@ -207,16 +223,19 @@ router.get('/rounds', function(req, res, next) {
 });
 
 router.get('/leaderboards', function(req, res, next) {
-  var date = req.query.month;
-  if(date == undefined){
-    date_filter = new Date();
+  if(req.query.startDate == undefined) {
+    var start_date = new Date();
+    start_date.setFullYear(start_date.getFullYear()-1);
   } else {
-    date_filter = new Date(date);
+    var start_date = new Date(req.query.startDate);
   }
-  previous_date = new Date(date_filter.getTime());
-  previous_date.setMonth(date_filter.getMonth() + 1);
+  if(req.query.endDate == undefined) {
+    var end_date = new Date();
+  } else {
+    var end_date = new Date(req.query.endDate);
+  }
   Match.find({'players': {$in: ['Tim', 'Ryan', 'Collin', 'Sean', 'Jack', 'Connor']},
-              'date': {$gte: date_filter, $lt: previous_date}})
+              'date': {$gte: start_date, $lt: end_date}})
     .populate('stats_instances')
     .exec(function (err, results) {
     if (err) {return next(err);}
@@ -226,12 +245,13 @@ router.get('/leaderboards', function(req, res, next) {
                     'Collin': {'rating': 0, 'kdr': 0, 'kda': 0, 'hs': 0, 'adr': 0, 'kpr': 0, 'count': 0},
                     'Sean': {'rating': 0, 'kdr': 0, 'kda': 0, 'hs': 0, 'adr': 0, 'kpr': 0, 'count': 0},
                     'Jack': {'rating': 0, 'kdr': 0, 'kda': 0, 'hs': 0, 'adr': 0, 'kpr': 0, 'count': 0},
-                    'Connor': {'rating': 0, 'kdr': 0, 'kda': 0, 'hs': 0, 'adr': 0, 'kpr': 0, 'count': 0}};
+                    'Connor': {'rating': 0, 'kdr': 0, 'kda': 0, 'hs': 0, 'adr': 0, 'kpr': 0, 'count': 0},
+                    'Gil': {'rating': 0, 'kdr': 0, 'kda': 0, 'hs': 0, 'adr': 0, 'kpr': 0, 'count': 0}};
 
     for(match in results) {
       var current_match = results[match]
       for(player in results[match].players){
-        if(['Tim','Ryan','Collin','Sean','Jack','Connor'].includes(current_match.players[player])){
+        if(['Tim','Ryan','Collin','Sean','Jack','Connor','Gil'].includes(current_match.players[player])){
           averages[current_match.players[player]].rating += current_match.stats_instances[player].rating;
           averages[current_match.players[player]].kdr += current_match.stats_instances[player].kdr;
           averages[current_match.players[player]].kda += current_match.stats_instances[player].kda;
@@ -257,20 +277,7 @@ router.get('/leaderboards', function(req, res, next) {
     var hs = [];
     var adr = [];
     var kpr = [];
-    var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    var month_years = [];
-    //var matches = results.matches;
-    /*matches.sort(function(a,b) {
-      return new Date(b.date) - new Date(a.date);
-    });*/
-    var month_date = new Date();
-    while (month_date.getFullYear() != "2016" || month_date.getMonth() != 8) {
-      date_string = months[month_date.getMonth()] + " " + month_date.getFullYear();
-      if(!month_years.includes(date_string)){
-        month_years.push(date_string);
-      }
-      month_date.setMonth(month_date.getMonth()-1);
-    }
+
     for (player in averages) {
       ratings.push({'player': player, 'stat': averages[player].rating});
       kdr.push({'player': player, 'stat': averages[player].kdr});
@@ -286,7 +293,7 @@ router.get('/leaderboards', function(req, res, next) {
     adr.sort(compare_stats);
     kpr.sort(compare_stats);
 
-    res.render('leaderboards', { title: 'Leaderboards', ratings:ratings, kdr:kdr, kda:kda, hs:hs, adr:adr, kpr:kpr, months: month_years});
+    res.render('leaderboards', { title: 'Leaderboards', ratings:ratings, kdr:kdr, kda:kda, hs:hs, adr:adr, kpr:kpr, start_date: start_date.toISOString().substring(0, 10), end_date: end_date.toISOString().substring(0, 10)});
   });
 });
 

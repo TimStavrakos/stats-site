@@ -4,12 +4,8 @@ block content
   .content-wrapper
     .filters-wrapper
       form(action="/leaderboards" method="GET")
-        select(name="month")
-          each month, index in months
-            if index == 0
-              option(selected value=month) #{month}
-            else
-              option(value=month) #{month}
+        input#startDate.Filter(type="date" name="startDate" value=start_date)
+        input#endDate.Filter(type="date" name="endDate" value=end_date)
         input(type="submit" action="submit")
     .first-row
       table#rating-table

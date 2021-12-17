@@ -10,7 +10,7 @@ canvas {
 }
 
 body {
-    background-color: #333333;
+    background-color: #89AAE6;
     text-align: center;
     color: #e6e6e6;
     font-family: sans-serif;
@@ -34,7 +34,7 @@ li {
     outline: none;
     color: white;
     padding: 14px 16px;
-    background-color: #000000;
+    background-color: #061826;
     font-family: sans-serif;
     font-weight: bold;
     margin: 0;
@@ -43,7 +43,7 @@ li {
 .dropdown-content {
     display: none;
     position: absolute;
-    background-color: #000000;
+    background-color: #061826;
     min-width: 160px;
     box-shadow: 0px 5px 5px 0px rgba(38,38,38,1);
     z-index: 1;
@@ -59,7 +59,7 @@ li {
 }
 
 .dropdown-content a:hover {
-    background-color: #1a1a1a;
+    background-color: #3685B5;
 }
 
 .dropdown:hover .dropdown-content{
@@ -68,7 +68,7 @@ li {
 
 .navbar {
     overflow: hidden;
-    background-color: #000000;
+    background-color: #061826;
     font-family: sans-serif;
     font-weight: bold;
     box-shadow: 0px 5px 5px 0px rgba(38,38,38,1);
@@ -89,7 +89,7 @@ li {
 }
 
 .navbar a:hover, .dropdown:hover, .dropbutton, .dropbutton:focus {
-    background-color: #1a1a1a;
+    background-color: #3685B5;
     color: white;
 }
 
@@ -150,6 +150,21 @@ tr.tie_row {
   background-color: #ffd966;
 }
 
+tr.win_row:hover, tr.win_row:focus-within{
+  outline:none;
+  background-color: rgb(31, 181, 76);
+}
+
+tr.loss_row:hover, tr.loss_row:focus-within{
+  outline:none;
+  background-color: rgb(245, 88, 88);
+}
+
+tr.tie_row:hover, tr.tie_row:focus-within{
+  outline:none;
+  background-color: rgb(250, 199, 47);
+}
+
 .Filter {
   min-width: 10em;
 }
@@ -195,6 +210,17 @@ td {
   border: 1px solid black;
   color: black;
 }
+
+td > a:first-child {
+  text-decoration: none;
+  color: inherit;
+  z-index: 0;
+
+  &:focus {
+    outline: 0;
+  }
+}
+
 
 select {
     width: 10%;

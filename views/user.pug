@@ -16,6 +16,7 @@ block content
     p Win% #{win_per.toFixed(1)}%
     p Loss% #{loss_per.toFixed(1)}%
     p Tie% #{tie_per.toFixed(1)}%
+    p Trade Ratio #{(averages.trades/averages.trade_deaths).toFixed(2)}
     //canvas#myChart
   .filters-wrapper
     - var this_user= "/users/" + user
@@ -35,7 +36,7 @@ block content
         option(value='win') Win
         option(value='loss') Loss
         option(value='draw') Draw
-      input#startDate.Filter(type="date" name="startDate" value="2016-10-07")
+      input#startDate.Filter(type="date" name="startDate" value="#{start_date}")
       input#endDate.Filter(type="date" name="endDate")
       input(type="submit" action="Submit")
   .table-wrapper
@@ -55,6 +56,7 @@ block content
         th KPR:T
         th KPR:CT
         th Trades
+        th Trade Deaths
         th HS%
         th Kills
         th Assists
@@ -74,40 +76,85 @@ block content
         th= (averages.kpr_t).toFixed(2)
         th= (averages.kpr_ct).toFixed(2)
         th= (averages.trades).toFixed(2)
+        th= (averages.trade_deaths).toFixed(2)
         th= (averages.hs).toFixed(2)
         th= (averages.kills).toFixed(2)
         th= (averages.assists).toFixed(2)
         th= (averages.deaths).toFixed(2)
         th= (averages.clutches).toFixed(2)
         th= (averages.fiveK).toFixed(2)
+      tr#deviationsHeader
+        th(colspan='3') Deviation:
+        th= (variations.rating).toFixed(2)
+        th= (variations.rating_t).toFixed(2)
+        th= (variations.rating_ct).toFixed(2)
+        th= (variations.adr).toFixed(2)
+        th= (variations.adr_t).toFixed(2)
+        th= (variations.adr_ct).toFixed(2)
+        th= (variations.kdd).toFixed(2)
+        th= (variations.kpr).toFixed(2)
+        th= (variations.kpr_t).toFixed(2)
+        th= (variations.kpr_ct).toFixed(2)
+        th= (variations.trades).toFixed(2)
+        th= (variations.trade_deaths).toFixed(2)
+        th= (variations.hs).toFixed(2)
+        th= (variations.kills).toFixed(2)
+        th= (variations.assists).toFixed(2)
+        th= (variations.deaths).toFixed(2)
+        th= (variations.clutches).toFixed(2)
+        th= (variations.fiveK).toFixed(2)
 
       each stat in stats_list
         - var result = stat.results + "_row"
         - var player_index = stat.players.indexOf(user)
         tr(class=result)
-          td #{stat.formatted_date}
-          td #{stat.map}
-          td #{stat.score[0]}-#{stat.score[1]}
-          td= stat.stats_instances[player_index].rating.toFixed(2)
-          td= stat.stats_instances[player_index].rating_t.toFixed(2)
-          td= stat.stats_instances[player_index].rating_ct.toFixed(2)
-          td= stat.stats_instances[player_index].adr.toFixed(2)
-          td= stat.stats_instances[player_index].adr_t.toFixed(2)
-          td= stat.stats_instances[player_index].adr_ct.toFixed(2)
-          td= stat.stats_instances[player_index].kdd
-          td= stat.stats_instances[player_index].kpr.toFixed(2)
+          td
+            -var link = "/match/" + stat._id
+            a(href=link) #{stat.formatted_date}
+          td
+            a(href=link tabindex="-1") #{stat.map}
+          td
+            a(href=link tabindex="-1") #{stat.score[0]}-#{stat.score[1]}
+          td
+            a(href=link tabindex="-1")= stat.stats_instances[player_index].rating.toFixed(2)
+          td
+            a(href=link tabindex="-1")= stat.stats_instances[player_index].rating_t.toFixed(2)
+          td
+            a(href=link tabindex="-1")= stat.stats_instances[player_index].rating_ct.toFixed(2)
+          td
+            a(href=link tabindex="-1")= stat.stats_instances[player_index].adr.toFixed(2)
+          td
+            a(href=link tabindex="-1")= stat.stats_instances[player_index].adr_t.toFixed(2)
+          td
+            a(href=link tabindex="-1")= stat.stats_instances[player_index].adr_ct.toFixed(2)
+          td
+            a(href=link tabindex="-1")= stat.stats_instances[player_index].kdd
+          td
+            a(href=link tabindex="-1")= stat.stats_instances[player_index].kpr.toFixed(2)
           if stat.stats_instances[player_index].kpr_t == null
-            td= stat.stats_instances[player_index].kpr_t
+            td
+              a(href=link tabindex="-1")= stat.stats_instances[player_index].kpr_t
           else
-            td= stat.stats_instances[player_index].kpr_t.toFixed(2)
-          td= stat.stats_instances[player_index].kpr_ct.toFixed(2)
-          td #{stat.stats_instances[player_index].trade_kills}
-          td= stat.stats_instances[player_index].hs.toFixed(2)
-          td #{stat.stats_instances[player_index].kills}
-          td #{stat.stats_instances[player_index].assists}
-          td #{stat.stats_instances[player_index].deaths}
-          td #{stat.stats_instances[player_index].clutches}
-          td #{stat.stats_instances[player_index].fiveK}
+            td
+              a(href=link tabindex="-1")= stat.stats_instances[player_index].kpr_t.toFixed(2)
+          td
+            a(href=link tabindex="-1")= stat.stats_instances[player_index].kpr_ct.toFixed(2)
+          td
+            a(href=link tabindex="-1") #{stat.stats_instances[player_index].trade_kills}
+          td
+            a(href=link tabindex="-1") #{stat.stats_instances[player_index].trade_deaths}
+          td
+            a(href=link tabindex="-1")= stat.stats_instances[player_index].hs.toFixed(2)
+          td
+            a(href=link tabindex="-1") #{stat.stats_instances[player_index].kills}
+          td
+            a(href=link tabindex="-1") #{stat.stats_instances[player_index].assists}
+          td
+            a(href=link tabindex="-1") #{stat.stats_instances[player_index].deaths}
+          td
+            a(href=link tabindex="-1") #{stat.stats_instances[player_index].clutches}
+          td
+            a(href=link tabindex="-1") #{stat.stats_instances[player_index].fiveK}
 
   script.
     window.onload = function() {todaysDate();getMaps();}
@@ -121,6 +168,18 @@ block content
 
     function format(date) {
       return (date.getMonth() + 1) + "/" + date.getDate() + "/" + date.getFullYear();
+    }
+
+    function Queue() {
+      this.elements = [];
+    }
+
+    Queue.prototype.enqueue = function (e) {
+      this.elements.push(e);
+    };
+
+    Queue.prototype.dequeue = function () {
+      return this.elements.shift();
     }
 
     function getMaps() {
@@ -151,12 +210,24 @@ block content
     var ctx2 = document.getElementById('myChart2').getContext('2d');
     var dates = [];
     var players = [];
+    var rolling = [];
+    var count = 1;
+    var sum = 0;
+    var q = new Queue();
     for(var i = matches.length-1; i >= 0; i--){
       var date = new Date(matches[i].date);
       dates.push((date.getMonth()+1) + "/" + date.getDate() + "/" + date.getFullYear());
       for(match_player in matches[i].players){
         if("#{user}" == matches[i].players[match_player]){
           players.push(matches[i].stats_instances[match_player].rating);
+          q.enqueue(matches[i].stats_instances[match_player].rating);
+          sum += matches[i].stats_instances[match_player].rating;
+          if(count > 14) {
+            sum -= q.dequeue();
+            count = 15;
+          }
+          rolling.push(sum/count);
+          count += 1;
         }
       }
     }
@@ -166,7 +237,8 @@ block content
       "data": {
         "labels": dates,
         "datasets":[
-          {"label": "#{user}", "data": players,"fill":false,"borderColor":"rgb(75,192,192)", "spanGaps": true}
+          {"label": "#{user}", "data": players,"fill":false,"borderColor":"rgb(75,192,192)", "spanGaps": true},
+          {"label": "Rolling", "data": rolling,"fill":false, "borderColor": "rgb(252, 186, 3)", "spanGaps": true}
         ],
       },
       "options":{
@@ -174,6 +246,14 @@ block content
           line: {
               tension: 0
           }
+        },
+        scales: {
+          yAxes: [{
+            ticks: {
+              min: 0,
+              max: 2.5
+            }
+          }]
         }
       }
     });
