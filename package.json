@@ -15,7 +15,7 @@
     "express": "~4.16.1",
     "http-errors": "~1.6.3",
     "mdb-ui-kit": "^3.9.0",
-    "moment": "^2.24.0",
+    "moment": "^2.29.2",
     "mongoose": "^5.12.4",
     "morgan": "~1.9.1",
     "node-xlsx": "^0.17.1",
